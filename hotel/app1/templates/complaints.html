@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Hotel Services - Dashboard{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Hotel Services - Dashboard</h3>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  {% for message in messages %}
+  <div class="toast text-bg-primary border-0 shadow-lg mb-3" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 350px; font-size: 1.1rem;">
+    <div class="d-flex">
+      <div class="toast-body fw-bold">
+        {{ message }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<!-- Top Dashboard Cards -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-purple text-white fw-semibold">Dashboard</div>
+  <div class="card-body">
+    <div id="complaint-summary" class="d-flex flex-wrap gap-3"></div>
+  </div>
+</div>
+
+<!-- Filter Buttons + New Request -->
+<div class="d-flex justify-content-between mb-3">
+  <div>
+    <a href="?status=Pending" class="btn btn-sm status-btn {% if status_filter == 'Pending' %}active{% endif %}">Pending</a>
+    <a href="?status=Closed" class="btn btn-sm status-btn {% if status_filter == 'Closed' %}active{% endif %}">Closed</a>
+    <a href="?status=On Hold" class="btn btn-sm status-btn {% if status_filter == 'On Hold' %}active{% endif %}">On Hold</a>
+    <a href="?status=All" class="btn btn-sm status-btn {% if status_filter == 'All' %}active{% endif %}">All</a>
+  </div>
+  <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#addComplaintModal">+ New Request</button>
+</div>
+
+<!-- Complaints Table -->
+<div class="table-responsive">
+  <table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Requester</th>
+        <th>Location</th>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Owner</th>
+        <th>Created On</th>
+        <th>Due Date</th>
+        {% if is_admin %}<th>Action</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in complaints %}
+      <tr>
+        <td>{{ c.user.username }}</td>
+        <td><b>{{ c.location }}</b></td>
+        <td>{{ c.title }}</td>
+        <td>{{ c.description }}</td>
+        <td>
+          <span class="badge 
+            {% if c.status == 'NEW' %} bg-danger
+            {% elif c.status == 'ACCEPTED' %} bg-success
+            {% elif c.status == 'ON_HOLD' %} bg-warning text-dark
+            {% else %} bg-secondary{% endif %}">
+            {{ c.status }}
+          </span>
+        </td>
+        <td>{{ c.owner }}</td>
+        <td>{{ c.created_on|date:"d-M-Y H:i A" }}</td>
+        <td>{% if c.due_date %}{{ c.due_date|date:"d-M-Y H:i A" }}{% else %}-{% endif %}</td>
+        {% if is_admin %}
+        <td class="text-nowrap">
+          <a href="{% url 'update_complaint_status' c.id 'accept' %}" class="btn btn-sm btn-outline-primary">Accept</a>
+          <a href="{% url 'update_complaint_status' c.id 'assign' %}" class="btn btn-sm btn-outline-secondary">Assign</a>
+          <a href="{% url 'update_complaint_status' c.id 'close' %}" class="btn btn-sm btn-outline-danger">Close</a>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Add Complaint Modal -->
+<div class="modal fade" id="addComplaintModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'add_complaint' %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">New Complaint</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <select name="user_id" class="form-control mb-2" required>
+            <option value="">-- Select User --</option>
+            {% for u in users %}
+              <option value="{{ u.id }}">{{ u.username }}</option>
+            {% endfor %}
+          </select>
+          <input type="text" class="form-control mb-2" name="location" placeholder="Location" required>
+          <input type="text" class="form-control mb-2" name="title" placeholder="Title" required>
+          <textarea class="form-control" name="description" placeholder="Describe issue" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

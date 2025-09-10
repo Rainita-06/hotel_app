@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Visitor Check{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">🕵️ Visitor Check</h3>
+
+<table id="visitorTable" class="table-gym display">
+  <thead>
+    <tr>
+      <th>Visitor ID</th>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Registered At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for visitor in visitors %}
+    <tr>
+      <td>{{ visitor.id }}</td>
+      <td>{{ visitor.name }}</td>
+      <td>{{ visitor.phone }}</td>
+      <td>{{ visitor.email }}</td>
+      <td>{{ visitor.created_at }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    new DataTable("#visitorTable", { responsive: true, pageLength: 10 });
+  });
+</script>
+{% endblock %}

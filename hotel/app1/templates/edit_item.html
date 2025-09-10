@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card p-3">
+  <h5>Edit Item "{{ item.label }}"</h5>
+  <form method="POST">
+    {% csrf_token %}
+    <input type="text" name="label" class="form-control mb-2" value="{{ item.label }}" required>
+    <label>
+      <input type="checkbox" name="required" {% if item.required %}checked{% endif %}> Required
+    </label><br><br>
+    <button type="submit" class="btn btn-success">Update</button>
+    <a href="{% url 'checklist_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

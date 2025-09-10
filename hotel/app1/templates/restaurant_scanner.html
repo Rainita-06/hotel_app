@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Restaurant Scanner{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Scan / Validate Voucher</h3>
+  <div class="mb-2">
+    <input id="voucher_input" class="form-control" placeholder="Paste voucher code or ID">
+  </div>
+  <button id="scan_btn" class="btn btn-success">Validate & Redeem</button>
+
+  <div id="result" class="mt-3"></div>
+</div>
+
+<script>
+document.getElementById("scan_btn").addEventListener("click", async () => {
+  const v = document.getElementById("voucher_input").value.trim();
+  if (!v) return alert("Enter voucher code or id");
+
+  const form = new FormData();
+  // If input looks numeric treat as id else code
+  if (/^\d+$/.test(v)) form.append("voucher_id", v); else form.append("voucher_code", v);
+
+  const csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+  const res = await fetch("{% url 'scan_voucher_api' %}", {
+    method: "POST",
+    headers: {"X-CSRFToken": csrftoken},
+    body: form
+  });
+  const data = await res.json();
+  const el = document.getElementById("result");
+  if (data.success) {
+    el.innerHTML = `<div class="alert alert-success">${data.message}<br>Guest: ${data.guest_name} Room: ${data.room_no}</div>`;
+  } else {
+    el.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Gym Members{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">🏋️ Gym Members</h3>
+
+<a href="{% url 'add_member' %}" class="btn btn-primary mb-3">+ Add New Member</a>
+
+<table id="memberTable" class="table-gym display">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Full Name</th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Plan Type</th>
+      <th>Status</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for member in members %}
+    <tr>
+      <td>{{ member.member_id }}</td>
+      <td>{{ member.full_name }}</td>
+      <td>{{ member.phone }}</td>
+      <td>{{ member.email }}</td>
+      <td>{{ member.plan_type }}</td>
+      <td>{{ member.status }}</td>
+      <td>{{ member.start_date }}</td>
+      <td>{{ member.end_date }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    new DataTable("#memberTable", { responsive: true, pageLength: 10 });
+  });
+</script>
+{% endblock %}

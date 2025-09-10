@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 text-center">
+    <h3>📷 Scan Voucher QR Code</h3>
+    <div id="reader" style="width: 350px; margin: auto;"></div>
+    <div id="scan-result" class="mt-3 alert d-none"></div>
+</div>
+
+<!-- QR Scanner library -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+function onScanSuccess(decodedText, decodedResult) {
+    console.log("✅ QR Code detected:", decodedText);
+
+    // Call API
+    fetch(`/api/vouchers/validate/?code=${decodedText}`)
+        .then(response => response.json())
+        .then(data => {
+            let resultBox = document.getElementById("scan-result");
+            resultBox.classList.remove("d-none");
+            resultBox.innerHTML = data.message;
+
+            if (data.success) {
+                resultBox.classList.add("alert-success");
+                resultBox.classList.remove("alert-danger");
+            } else {
+                resultBox.classList.add("alert-danger");
+                resultBox.classList.remove("alert-success");
+            }
+            setTimeout(() => {
+                resultBox.classList.add("d-none");
+                resultBox.innerHTML = "";
+                resultBox.classList.remove("alert-success", "alert-danger");
+            }, 9000);
+
+            
+        })
+        .catch(err => console.error("Error validating voucher:", err));
+}
+
+// Setup scanner
+let html5QrcodeScanner = new Html5QrcodeScanner(
+    "reader", 
+    { facingMode: "environment" }, 
+    { fps: 10, qrbox:{ width: 250, height: 250 }}
+);
+html5QrcodeScanner.render(onScanSuccess);
+</script>
+{% endblock %}

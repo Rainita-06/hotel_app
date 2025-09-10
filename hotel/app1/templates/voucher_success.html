@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Breakfast Voucher{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  {% if voucher %}
+    <div class="card voucher-card shadow-sm">
+      <div class="card-header bg-success text-white voucher-header">
+        <span>🍽️ Breakfast Voucher Generated</span>
+        <span class="badge bg-light text-success">Voucher Code: {{ voucher.voucher_code }}</span>
+      </div>
+      <div class="card-body voucher-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Guest Name:</strong> {{ voucher.guest_name }}</p>
+            <p><strong>Room No:</strong> {{ voucher.room_no }}</p>
+            <p><strong>Adults:</strong> {{ voucher.adults }}</p>
+            <p><strong>Kids:</strong> {{ voucher.kids }}</p>
+            <p><strong>Check-in:</strong> {{ voucher.check_in_date }}</p>
+            <p><strong>Check-out:</strong> {{ voucher.check_out_date|default:"N/A" }}</p>
+          </div>
+
+          {% if qr_absolute_url %}
+          <div class="col-md-6 text-center voucher-qr">
+            <img src="{{ qr_absolute_url }}" alt="Voucher QR Code" class="img-fluid mb-3 rounded">
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 voucher-actions">
+              <!-- WhatsApp Share -->
+              <a class="btn btn-success" 
+                 href="https://wa.me/91{{ voucher.phone_number }}?text=View%20your%20voucher%20here:%20{{ landing_url|urlencode }}" 
+                 target="_blank">
+                 Share on WhatsApp
+              </a>
+
+              <!-- View Voucher Page -->
+              <a class="btn btn-primary" href="{{ landing_url }}" target="_blank">
+                View Voucher Page
+              </a>
+
+              <!-- Download QR -->
+              <a class="btn btn-secondary"
+                 href="{{ qr_absolute_url }}"
+                 download="Room{{voucher.room_no}}_{{voucher.guest_name}}_Adults{{voucher.adults}}_Kids{{voucher.kids}}.png">
+                 Download QR Code
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Check-out Section -->
+        <div class="text-center mt-4">
+          {% if not voucher.check_out_date %}
+            <a href="{% url 'checkout' voucher.id %}" class="btn btn-danger btn-lg">
+              Mark Check-Out
+            </a>
+          {% else %}
+            <p class="text-success fw-bold">Checked out on: {{ voucher.check_out_date }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning text-center mt-4">
+      No voucher created (Breakfast not included).
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

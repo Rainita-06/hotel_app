@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card text-center p-4 shadow">
+    <h3 class="text-success">✅ Voucher Verified</h3>
+    <p><strong>Guest Name:</strong> {{ voucher.guest_name }}</p>
+    <p><strong>Room No:</strong> {{ voucher.room_no }}</p>
+    <p><strong>Adults:</strong> {{ voucher.adults }}</p>
+    <p><strong>Kids:</strong> {{ voucher.kids }}</p>
+    <p><strong>Check-in:</strong> {{ voucher.checkin_date }}</p>
+    <p><strong>Check-out:</strong> {{ voucher.checkout_date|default:"-" }}</p>
+    <p class="text-muted">Scanned at: {{ scanned_at }}</p>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+# app1/migrations/0015_auto_create_usergroup_users.py
+
+from django.db import migrations, models
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('app1', '0014_remove_usergroup_group_name_alter_usergroup_users'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='UserGroup_users',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('usergroup', models.ForeignKey(on_delete=models.CASCADE, to='app1.usergroup')),
+                ('users', models.ForeignKey(on_delete=models.CASCADE, to='app1.users')),
+            ],
+            options={
+                'db_table': 'user_group_users',
+            },
+        ),
+        migrations.AlterUniqueTogether(
+            name='usergroup_users',
+            unique_together={('usergroup', 'users')},
+        ),
+    ]

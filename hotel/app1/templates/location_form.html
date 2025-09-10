@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{% if location %}Edit{% else %}Add{% endif %} Location</h2>
+
+    <form method="post" class="row g-3">
+        {% csrf_token %}
+
+        <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{% if location %}{{ location.name }}{% endif %}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="room_no" class="form-label">Room No</label>
+            <input type="text" class="form-control" id="room_no" name="room_no" value="{% if location %}{{ location.room_no }}{% endif %}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="pavilion" class="form-label">Pavilion</label>
+            <input type="text" class="form-control" id="pavilion" name="pavilion" value="{% if location %}{{ location.pavilion }}{% endif %}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="capacity" class="form-label">Capacity</label>
+            <input type="number" class="form-control" id="capacity" name="capacity" value="{% if location %}{{ location.capacity }}{% endif %}">
+        </div>
+
+        <div class="col-md-6">
+            <label for="family" class="form-label">Family</label>
+            <select class="form-select" id="family" name="family">
+                <option value="">--Select--</option>
+                {% for f in families %}
+                    <option value="{{ f.family_id }}" {% if location and location.family_id == f.family_id %}selected{% endif %}>{{ f.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="type" class="form-label">Type</label>
+            <select class="form-select" id="type" name="type">
+                <option value="">--Select--</option>
+                {% for t in types %}
+                    <option value="{{ t.type_id }}" {% if location and location.type_id == t.type_id %}selected{% endif %}>{{ t.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="floor" class="form-label">Floor</label>
+            <select class="form-select" id="floor" name="floor">
+                <option value="">--Select--</option>
+                {% for f in floors %}
+                    <option value="{{ f.floor_id }}" {% if location and location.floor_id == f.floor_id %}selected{% endif %}>{{ f.floor_number }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="building" class="form-label">Building</label>
+            <select class="form-select" id="building" name="building">
+                <option value="">--Select--</option>
+                {% for b in buildings %}
+                    <option value="{{ b.building_id }}" {% if location and location.building_id == b.building_id %}selected{% endif %}>{{ b.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 mt-3">
+            <button type="submit" class="btn btn-primary">{% if location %}Update{% else %}Save{% endif %}</button>
+            <a href="{% url 'locations_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

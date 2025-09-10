@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Request Management{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+
+  <!-- Request Families -->
+  <div class="card mb-3">
+    <div class="card-header bg-purple text-white d-flex justify-content-between align-items-center collapsible-header"
+         data-bs-toggle="collapse" data-bs-target="#familiesPanel">
+      <h5 class="mb-0">Request Families</h5>
+      <a href="{% url 'request_item_add' 'family' %}" class="btn btn-light btn-sm">
+        <i class="bi bi-plus-circle"></i> Add
+      </a>
+    </div>
+    <div id="familiesPanel" class="collapse show">
+      <div class="card-body">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Family</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in request_types %}
+            <tr>
+              <td>{{ f.name }}</td>
+              <td>
+                <a href="#" class="btn btn-sm btn-warning">✏ Edit</a>
+                <a href="#" class="btn btn-sm btn-danger">🗑 Delete</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" class="text-center">No families found</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workflows -->
+  <div class="card mb-3">
+    <div class="card-header bg-purple text-white d-flex justify-content-between align-items-center collapsible-header"
+         data-bs-toggle="collapse" data-bs-target="#workflowsPanel">
+      <h5 class="mb-0">Workflows</h5>
+      <a href="{% url 'request_item_add' 'workflow' %}" class="btn btn-light btn-sm">
+        <i class="bi bi-plus-circle"></i> Add
+      </a>
+    </div>
+    <div id="workflowsPanel" class="collapse">
+      <div class="card-body">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Name</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for wf in workflows %}
+            <tr>
+              <td>{{ wf.name }}</td>
+              <td>
+                <a href="#" class="btn btn-sm btn-warning">✏ Edit</a>
+                <a href="#" class="btn btn-sm btn-danger">🗑 Delete</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" class="text-center">No workflows found</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Predefined Requests -->
+  <div class="card mb-3">
+    <div class="card-header bg-purple text-white d-flex justify-content-between align-items-center collapsible-header"
+         data-bs-toggle="collapse" data-bs-target="#typesPanel">
+      <h5 class="mb-0">Predefined Requests</h5>
+      <a href="{% url 'request_item_add' 'request_type' %}" class="btn btn-light btn-sm">
+        <i class="bi bi-plus-circle"></i> Add
+      </a>
+    </div>
+    <div id="typesPanel" class="collapse">
+      <div class="card-body">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Request Type</th>
+              <th>Request Family</th>
+              <th>Work Family</th>
+              <th>Workflow</th>
+              <th>Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for rt in request_types %}
+            <tr>
+              <td>{{ rt.name }}</td>
+              <td>{% if rt.request_family %}{{ rt.request_family.name }}{% else %}-{% endif %}</td>
+              <td>{% if rt.work_family %}{{ rt.work_family.name }}{% else %}-{% endif %}</td>
+              <td>{% if rt.workflow %}{{ rt.workflow.name }}{% else %}-{% endif %}</td>
+              <td>{% if rt.active %}✅{% else %}❌{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center">No request types found</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Work Families -->
+  <div class="card mb-3">
+    <div class="card-header bg-purple text-white d-flex justify-content-between align-items-center collapsible-header"
+         data-bs-toggle="collapse" data-bs-target="#workFamiliesPanel">
+      <h5 class="mb-0">Work Families</h5>
+      <a href="{% url 'request_item_add' 'work_family' %}" class="btn btn-light btn-sm">
+        <i class="bi bi-plus-circle"></i> Add
+      </a>
+    </div>
+    <div id="workFamiliesPanel" class="collapse">
+      <div class="card-body">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Work Family</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for wf in work_families %}
+            <tr>
+              <td>{{ wf.name }}</td>
+              <td>
+                <a href="#" class="btn btn-sm btn-warning">✏ Edit</a>
+                <a href="#" class="btn btn-sm btn-danger">🗑 Delete</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" class="text-center">No work families found</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

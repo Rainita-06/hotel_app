@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Access Denied{% endblock %}
+{% block content %}
+<script>
+  window.onload = function() {
+    alert("🚫 You cannot access this page!");
+    window.location.href = "{% url 'hotel_dashboard' %}";
+  }
+</script>
+{% endblock %}

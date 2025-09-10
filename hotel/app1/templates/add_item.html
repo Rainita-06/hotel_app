@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h5>Add Item to Checklist: {{ checklist.name }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="label" class="form-label">Item Label</label>
+                <input type="text" class="form-control" id="label" name="label" placeholder="Enter item label" required>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="required" name="required">
+                <label class="form-check-label" for="required">Required</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Item</button>
+            <a href="{% url 'checklist_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

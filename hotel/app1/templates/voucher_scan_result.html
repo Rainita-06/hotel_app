@@ -1,0 +1,56 @@
+<!-- templates/voucher_scan_result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Voucher Scan Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            text-align: center;
+            width: 400px;
+        }
+        .status-success { color: green; }
+        .status-expired, .status-invalid_date, .status-already_used { color: red; }
+        .message { font-size: 18px; margin: 15px 0; }
+        .info { font-size: 16px; margin-top: 10px; }
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .btn-back:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="status-{{ status }}">
+            {% if status == "success" %}✅{% else %}❌{% endif %}
+        </h2>
+        <div class="message">{{ message }}</div>
+
+        {% if include_breakfast is not None %}
+            <div class="info">
+                Breakfast Included: {{ include_breakfast|yesno:"Yes,No" }}
+            </div>
+        {% endif %}
+
+        <a href="{% url 'create_voucher_checkin' %}" class="btn-back">Back to Check-In</a>
+    </div>
+</body>
+</html>

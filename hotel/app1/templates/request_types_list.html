@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Request Types</h2>
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  {% for message in messages %}
+  <div class="toast text-bg-primary border-0 shadow-lg mb-3" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 350px; font-size: 1.1rem;">
+    <div class="d-flex">
+      <div class="toast-body fw-bold">
+        {{ message }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+        <a href="{% url 'request_type_add' %}" class="btn btn-primary">Add New Request Type</a>
+    </div>
+
+    <!-- Filters -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label for="request_family" class="form-label">Request Family</label>
+            <select name="request_family" id="request_family" class="form-select">
+                <option value="">All</option>
+                {% for f in request_families %}
+                    <option value="{{ f.request_family_id }}" {% if selected_family == f.request_family_id|stringformat:"s" %}selected{% endif %}>
+                        {{ f.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="work_family" class="form-label">Work Family</label>
+            <select name="work_family" id="work_family" class="form-select">
+                <option value="">All</option>
+                {% for w in work_families %}
+                    <option value="{{ w.work_family_id }}" {% if selected_work_family == w.work_family_id|stringformat:"s" %}selected{% endif %}>
+                        {{ w.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="workflow" class="form-label">Workflow</label>
+            <select name="workflow" id="workflow" class="form-select">
+                <option value="">All</option>
+                {% for wf in workflows %}
+                    <option value="{{ wf.workflow_id }}" {% if selected_workflow == wf.workflow_id|stringformat:"s" %}selected{% endif %}>
+                        {{ wf.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-success me-2">Filter</button>
+            <a href="{% url 'request_types_list' %}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Request Family</th>
+                    <th>Work Family</th>
+                    <th>Workflow</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rt in request_types %}
+                <tr>
+                    <td>{{ rt.name }}</td>
+                    <td>
+                        {% if rt.request_family %}
+                            {{ rt.request_family.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if rt.work_family %}
+                            {{ rt.work_family.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if rt.workflow %}
+                            {{ rt.workflow.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if rt.active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'request_type_edit' rt.request_type_id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'request_type_delete' rt.request_type_id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No request types found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Room Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Room Details</h2>
+  <p><strong>Room No:</strong> {{ voucher.room_no }}</p>
+  <p><strong>Customer:</strong> {{ voucher.customer_name }}</p>
+  <p><strong>Status:</strong> {{ voucher.status }}</p>
+  <p><strong>Date:</strong> {{ voucher.created_at|date:"Y-m-d" }}</p>
+  <div class="alert mt-3 
+       {% if voucher.status == 'Checked' %}alert-success{% else %}alert-warning{% endif %}">
+    {{ message }}
+  </div>
+</div>
+{% endblock %}

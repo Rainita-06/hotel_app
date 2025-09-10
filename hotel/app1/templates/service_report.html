@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+{% block title %}Service Report{% endblock %}
+
+{% block content %}
+<style>
+    .bg-purple { background: #6f42c1 !important; }
+    .text-green { color: #e9ffe9 !important; }
+    .card-soft { border: 1px solid #eef0f3; border-radius: 14px; }
+    .metric-card .value { font-size: 28px; font-weight: 800; line-height: 1; }
+    .metric-card .label { color: #6b7280; margin-top: 4px; }
+    .metric-card small { color: #9ca3af; }
+    .table-sm td, .table-sm th { padding: .5rem .6rem; }
+    .filter-box h6 { font-weight: 700; color: #374151; }
+</style>
+
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header bg-purple text-green d-flex align-items-center">
+            <h5 class="mb-0">📊 Service Report</h5>
+        </div>
+        <div class="card-body">
+
+            <!-- ================= Filters ================= -->
+            <form method="get" class="row g-3 mb-4">
+                <!-- Requests -->
+                <div class="col-md-4">
+                    <div class="border p-3 rounded filter-box">
+                        <h6>Requests</h6>
+
+                        <select name="request_family" class="form-select mb-2">
+                            <option value="">All Request Families</option>
+                            {% for rf in request_families %}
+                                <option value="{{ rf.request_family_id }}" {% if request.GET.request_family == rf.request_family_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ rf.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="work_family" class="form-select mb-2">
+                            <option value="">All Work Families</option>
+                            {% for wf in work_families %}
+                                <option value="{{ wf.work_family_id }}" {% if request.GET.work_family == wf.work_family_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ wf.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="request_type" class="form-select mb-2">
+                            <option value="">All Types</option>
+                            {% for rt in request_types %}
+                                <option value="{{ rt.request_type_id }}" {% if request.GET.request_type == rt.request_type_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ rt.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="status" class="form-select mb-2">
+                            <option value="">All Status</option>
+                            <option {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+                            <option {% if request.GET.status == "On Hold" %}selected{% endif %}>On Hold</option>
+                            <option {% if request.GET.status == "Closed" %}selected{% endif %}>Closed</option>
+                        </select>
+
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="w-50">
+                                <label class="form-label mb-1">Start</label>
+                                <input type="date" name="start" value="{{ start }}" class="form-control">
+                            </div>
+                            <div class="w-50">
+                                <label class="form-label mb-1">End</label>
+                                <input type="date" name="end" value="{{ end }}" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="pending_only" {% if request.GET.pending_only %}checked{% endif %}>
+                            <label class="form-check-label">Pending Requests</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="on_hold" {% if request.GET.on_hold %}checked{% endif %}>
+                            <label class="form-check-label">On Hold</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="priority" {% if request.GET.priority %}checked{% endif %}>
+                            <label class="form-check-label">Priority</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users -->
+                <div class="col-md-4">
+                    <div class="border p-3 rounded filter-box">
+                        <h6>Users</h6>
+                        <select name="requester" class="form-select mb-2">
+                            <option value="">All Requesters</option>
+                            {% for u in requesters %}
+                                <option value="{{ u.user_id }}" {% if request.GET.requester == u.user_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ u.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <select name="owner" class="form-select mb-2">
+                            <option value="">All Owners</option>
+                            {% for u in owners %}
+                                <option value="{{ u.user_id }}" {% if request.GET.owner == u.user_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ u.full_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <select name="requester_dept" class="form-select mb-2">
+                            <option value="">All Requesters' Departments</option>
+                            {% for d in departments %}
+                                <option value="{{ d.department_id }}" {% if request.GET.requester_dept == d.department_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ d.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <select name="owner_dept" class="form-select mb-2">
+                            <option value="">All Owners' Departments</option>
+                            {% for d in departments %}
+                                <option value="{{ d.department_id }}" {% if request.GET.owner_dept == d.department_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ d.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Locations -->
+                <div class="col-md-4">
+                    <div class="border p-3 rounded filter-box">
+                        <h6>Locations</h6>
+                        <select name="location" class="form-select mb-2">
+                            <option value="">All Locations</option>
+                            {% for loc in locations %}
+                                <option value="{{ loc.location_id }}" {% if request.GET.location == loc.location_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ loc.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <select name="location_family" class="form-select mb-2">
+                            <option value="">All Location Families</option>
+                            {% for lf in location_families %}
+                                <option value="{{ lf.family_id }}" {% if request.GET.location_family == lf.family_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ lf.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <select name="building" class="form-select mb-2">
+                            <option value="">All Buildings</option>
+                            {% for b in buildings %}
+                                <option value="{{ b.building_id }}" {% if request.GET.building == b.building_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ b.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <select name="floor" class="form-select mb-2">
+                            <option value="">All Floors</option>
+                            {% for f in floors %}
+                                <option value="{{ f.floor_id }}" {% if request.GET.floor == f.floor_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ f.building.name }} – Floor {{ f.floor_number }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary px-4">Apply Filters</button>
+                </div>
+            </form>
+
+            <!-- ================= Cards ================= -->
+            <div class="row g-3 mb-4">
+                {% for c in dept_cards %}
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="card card-soft metric-card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="value">{{ c.total }}</div>
+                            <div class="label">{{ c.name }}</div>
+                            <small>{{ c.pending_percent }}% Pending</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ================= Charts ================= -->
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card card-soft">
+                        <div class="card-body">
+                            <canvas id="familyChart" height="260"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card card-soft">
+                        <div class="card-body">
+                            <canvas id="hourlyChart" height="260"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card card-soft">
+                        <div class="card-body">
+                            <canvas id="dailyChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= Top 10 Tables ================= -->
+            <div class="row mt-4 g-3">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span>🏆</span><h6 class="fw-bold mb-0">Top 10 Requesters</h6>
+                    </div>
+                    <table class="table table-sm table-bordered">
+                        <thead><tr><th>Requester</th><th>Total</th></tr></thead>
+                        <tbody>
+                        {% for r in top_requesters %}
+                            <tr><td>{{ r.requester_user__full_name|default:"-" }}</td><td>{{ r.total }}</td></tr>
+                        {% empty %}
+                            <tr><td colspan="2" class="text-center">No data</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span>👨‍💼</span><h6 class="fw-bold mb-0">Top 10 Owners</h6>
+                    </div>
+                    <table class="table table-sm table-bordered">
+                        <thead><tr><th>Owner</th><th>Total</th></tr></thead>
+                        <tbody>
+                        {% for r in top_owners %}
+                            <tr><td>{{ r.assignee_user__full_name|default:"-" }}</td><td>{{ r.total }}</td></tr>
+                        {% empty %}
+                            <tr><td colspan="2" class="text-center">No data</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span>📍</span><h6 class="fw-bold mb-0">Top 10 Locations</h6>
+                    </div>
+                    <table class="table table-sm table-bordered">
+                        <thead><tr><th>Location</th><th>Total</th></tr></thead>
+                        <tbody>
+                        {% for r in top_locations %}
+                            <tr><td>{{ r.location__name|default:"-" }}</td><td>{{ r.total }}</td></tr>
+                        {% empty %}
+                            <tr><td colspan="2" class="text-center">No data</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ================= List ================= -->
+            <h5 class="mt-4">List of Requests</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Created</th>
+                            <th>Location</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Requester</th>
+                            <th>Owner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in page_obj %}
+                        <tr>
+                            <td>{{ r.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ r.location.name|default:"-" }}</td>
+                            <td>{{ r.request_type.name|default:"-" }}</td>
+                            <td>{{ r.status|default:"-" }}</td>
+                            <td>{{ r.requester_user.full_name|default:"-" }}</td>
+                            <td>{{ r.assignee_user.full_name|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="text-center">No requests in this range.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </div>
+                 <div class="btn-group">
+                    {% if page_obj.has_previous %}
+                        <a class="btn btn-outline-secondary btn-sm" href="?{% for k,v in request.GET.items %}{% if not k == 'page' %}{{k}}={{v|urlencode}}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">Previous</a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                        <a class="btn btn-outline-secondary btn-sm" href="?{% for k,v in request.GET.items %}{% if not k == 'page' %}{{k}}={{v|urlencode}}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Next</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= Chart.js ================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+const hourlyData = JSON.parse('{{ hourly_json|escapejs }}');
+const dailyData  = JSON.parse('{{ daily_json|escapejs }}');
+const familyData = JSON.parse('{{ family_json|escapejs }}');
+
+console.log("Hourly Data:", hourlyData);
+console.log("Daily Data:", dailyData);
+console.log("Family Data:", familyData);
+
+// helpers
+const fmtInt = v => (v===null || v===undefined) ? 0 : parseInt(v, 10);
+
+// Family Pie (with % labels)
+Chart.register(ChartDataLabels);
+new Chart(document.getElementById('familyChart'), {
+    type: 'pie',
+    data: {
+        labels: familyData.map(f => f.label),
+        datasets: [{
+            data: familyData.map(f => fmtInt(f.total)),
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' },
+            datalabels: {
+                formatter: (value, ctx) => {
+                    const dataArr = ctx.chart.data.datasets[0].data;
+                    const sum = dataArr.reduce((a,b)=>a+b,0) || 1;
+                    return Math.round((value/sum)*100) + '%';
+                },
+                anchor: 'end',
+                align: 'end',
+                offset: 4,
+                font: { weight: 'bold' }
+            },
+            tooltip: { enabled: true }
+        }
+    }
+});
+
+// Hourly Bar
+new Chart(document.getElementById('hourlyChart'), {
+    type: 'bar',
+    data: {
+        labels: hourlyData.map(h => h.hour),
+        datasets: [{
+            label: 'Requests / Hour',
+            data: hourlyData.map(h => fmtInt(h.total)),
+            borderRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, ticks: { precision:0 } } },
+        plugins: { legend: { display: false }, tooltip: { enabled: true } }
+    }
+});
+
+// Daily Bar
+new Chart(document.getElementById('dailyChart'), {
+    type: 'bar',
+    data: {
+        labels: dailyData.map(d => d.day),
+        datasets: [{
+            label: 'Requests / Day',
+            data: dailyData.map(d => fmtInt(d.total)),
+            borderRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, ticks: { precision:0 } } },
+        plugins: { legend: { display: false } }
+    }
+});
+</script>
+{% endblock %}

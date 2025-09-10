@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Locations</h2>
+    <div class="container mt-4">
+    <h2 class="mb-4">Locations</h2>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  {% for message in messages %}
+  <div class="toast text-bg-primary border-0 shadow-lg mb-3" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 350px; font-size: 1.1rem;">
+    <div class="d-flex">
+      <div class="toast-body fw-bold">
+        {{ message }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+    <!-- Filters -->
+    <form method="get" class="row g-3 mb-4 align-items-end">
+        <div class="col-md-2">
+            <label for="family" class="form-label">Family</label>
+            <select class="form-select" id="family" name="family">
+                <option value="">All</option>
+                {% for f in families %}
+                    <option value="{{ f.family_id }}" {% if selected_family == f.family_id|stringformat:"s" %}selected{% endif %}>{{ f.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label for="type" class="form-label">Type</label>
+            <select class="form-select" id="type" name="type">
+                <option value="">All</option>
+                {% for t in types %}
+                    <option value="{{ t.type_id }}" {% if selected_type == t.type_id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label for="floor" class="form-label">Floor</label>
+            <select class="form-select" id="floor" name="floor">
+                <option value="">All</option>
+                {% for f in floors %}
+                    <option value="{{ f.floor_id }}" {% if selected_floor == f.floor_id|stringformat:"s" %}selected{% endif %}>{{ f.floor_number }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label for="building" class="form-label">Building</label>
+            <select class="form-select" id="building" name="building">
+                <option value="">All</option>
+                {% for b in buildings %}
+                    <option value="{{ b.building_id }}" {% if selected_building == b.building_id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{% url 'location_add' %}" class="btn btn-success">Add New Location</a>
+        </div>
+    </form>
+
+    <!-- Locations Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Room No</th>
+                    <th>Name</th>
+                    <th>Family</th>
+                    <th>Type</th>
+                    <th>Floor</th>
+                    <th>Building</th>
+                    <th>Pavilion</th>
+                    <th>Capacity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loc in locations %}
+                <tr>
+                    <td>{{ loc.room_no }}</td>
+                    <td>{{ loc.name }}</td>
+
+                    <td>
+                        {% if loc.family %}
+                            {{ loc.family.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if loc.type %}
+                            {{ loc.type.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if loc.floor %}
+                            {{ loc.floor.floor_number }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if loc.building %}
+                            {{ loc.building.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>{{ loc.pavilion }}</td>
+                    <td>{{ loc.capacity }}</td>
+                    <td>
+                        <a href="{% url 'location_edit' loc.location_id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'location_delete' loc.location_id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">No locations found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

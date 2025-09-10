@@ -1,0 +1,33 @@
+Date: 28/8/2025
+Time: 12:53
+Phone Number: +917259242146
+Message: Grand Sunshine HotelRoom: 120Guest: rainitaHere is your Breakfast Voucher:Adults: 1, Kids: 0Date: 28-08-2025Please scan the QR below when entering the restaurant.Thank you for choosing us!
+--------------------
+Date: 28/8/2025
+Time: 12:54
+Phone Number: +917259242146
+Message: Grand Sunshine HotelRoom: 120Guest: rainitaHere is your Breakfast Voucher:Adults: 1, Kids: 0Date: 28-08-2025Please scan the QR below when entering the restaurant.Thank you for choosing us!
+--------------------
+Date: 28/8/2025
+Time: 12:53
+Phone Number: +917259242146
+Image: qrcodes/voucher_24.png
+Caption: Breakfast Voucher (Room 120, Guest rainita)
+--------------------
+Date: 28/8/2025
+Time: 12:54
+Phone Number: +917259242146
+Message: Grand Sunshine HotelRoom: 120Guest: rainitaHere is your Breakfast Voucher:Adults: 1, Kids: 0Date: 28-08-2025Please scan the QR below when entering the restaurant.Thank you for choosing us!
+--------------------
+Date: 28/8/2025
+Time: 12:54
+Phone Number: +917259242146
+Image: qrcodes/voucher_25.png
+Caption: Breakfast Voucher (Room 120, Guest rainita)
+--------------------
+Date: 28/8/2025
+Time: 12:54
+Phone Number: +917259242146
+Image: qrcodes/voucher_26.png
+Caption: Breakfast Voucher (Room 120, Guest rainita)
+--------------------

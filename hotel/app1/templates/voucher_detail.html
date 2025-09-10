@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Voucher Detail{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Voucher: {{ voucher.voucher_code }}</h3>
+  <p>Guest: {{ voucher.guest_name }}</p>
+  <p>Room: {{ voucher.room_no }}</p>
+  <p>Valid: {{ voucher.check_in_date }} to {{ voucher.check_out_date }}</p>
+  <p>Status: {% if voucher.redeemed %}Redeemed at {{ voucher.redeemed_at }}{% else %}Not redeemed{% endif %}</p>
+  {% if voucher.qr_code_image %}
+    <img src="{{ voucher.qr_code_image.url }}" style="max-width:250px;">
+  {% endif %}
+</div>
+{% endblock %}

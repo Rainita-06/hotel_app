@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Guest Check-in & Breakfast Voucher</h2>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label>Guest Name</label>
+      <input type="text" name="guest_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Room No</label>
+      <input type="text" name="room_no" class="form-control">
+    </div>
+    <div class="mb-3">
+    <label>Phone Number</label>
+    <input type="text" name="phone_number" class="form-control" required>
+</div>
+
+<div class="mb-3">
+    <label>Email</label>
+    <input type="email" name="email" class="form-control">
+</div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Adults</label>
+        <input type="number" name="adults" class="form-control" min="1" value="1">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>Kids</label>
+        <input type="number" name="kids" class="form-control" min="0" value="0">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label>Check-in Date</label>
+      <input type="date" name="check_in_date" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label>Check-out Date</label>
+      <input type="date" name="check_out_date" class="form-control">
+    </div>
+    <div class="form-check mb-3">
+      <input type="checkbox" name="include_breakfast" class="form-check-input" id="includeBreakfast">
+      <label class="form-check-label" for="includeBreakfast">Include Breakfast</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Check-in & Generate Voucher</button>
+  </form>
+</div>
+{% endblock %}

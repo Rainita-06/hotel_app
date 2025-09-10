@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Departments{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>🏢 Departments</h2>
+  <a href="{% url 'department_create' %}" class="btn btn-success mb-3">+ Add Department</a>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Department Name</th>
+        <th>Description</th>
+        <th>Total Users</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for dept in departments %}
+      <tr>
+        <td><a href="{% url 'department_details' dept.department_id %}">{{ dept.name }}</a></td>
+        <td>{{ dept.description }}</td>
+        <td>{{ dept.total_users }}</td>
+        <td>
+          <a href="{% url 'department_edit' dept.department_id %}" class="btn btn-sm btn-primary">Edit</a>
+          <a href="{% url 'department_delete' dept.department_id %}" class="btn btn-sm btn-danger">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

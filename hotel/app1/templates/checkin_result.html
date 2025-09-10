@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  {% if voucher %}
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        Breakfast Voucher Generated
+      </div>
+      <div class="card-body">
+        <p><strong>Voucher Code:</strong> {{ voucher.voucher_code }}</p>
+        <p><strong>Guest Name:</strong> {{ voucher.guest_name }}</p>
+        <p><strong>Room No:</strong> {{ voucher.room_no }}</p>
+        <p><strong>Adults:</strong> {{ voucher.adults }}</p>
+        <p><strong>Kids:</strong> {{ voucher.kids }}</p>
+        <p><strong>Check-in:</strong> {{ voucher.check_in_date }}</p>
+        <p><strong>Check-out:</strong> {{ voucher.check_out_date }}</p>
+
+        {% if voucher.qr_code %}
+        <p><strong>QR Code:</strong></p>
+        <img src="data:image/png;base64,{{ voucher.qr_code }}" alt="QR Code" style="width:150px;">
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning">No voucher created (Breakfast not included).</div>
+  {% endif %}
+</div>
+{% endblock %}

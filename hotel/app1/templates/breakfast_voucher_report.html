@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3><b>Breakfast Voucher - Report</b></h3>
+
+    <form method="get" class="form-inline mb-3">
+        <label>From Date:</label>
+        <input type="date" name="from_date" value="{{ from_date }}" class="form-control mx-2">
+        <label>To Date:</label>
+        <input type="date" name="to_date" value="{{ to_date }}" class="form-control mx-2">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <button type="submit" name="export" value="1" class="btn btn-success ml-2">Export</button>
+    </form>
+
+    <table class="table table-bordered" id="voucherTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Guest</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Room</th>
+            <th>Adults</th>
+            <th>Kids</th>
+            <th>Quantity</th>
+            <th>QR Sent?</th>
+            <th>Scan Count</th>
+            <th>Redeemed</th>
+            <th>Redeemed At</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for v in vouchers %}
+        <tr>
+            <td>{{v.id}}</td>
+            <td>{{v.guest_name}}</td>
+            <td>{{v.phone_number}}</td>
+            <td>{{v.email}}</td>
+            <td>{{v.room_no}}</td>
+            <td>{{v.adults}}</td>
+            <td>{{v.kids}}</td>
+            <td>{{v.quantity}}</td>
+            <td>{% if v.qr_sent_whatsapp %}✅{% else %}❌{% endif %}</td>
+            <td>{{v.scan_count}}</td>
+            <td>{% if v.redeemed %}✅{% else %}❌{% endif %}</td>
+            <td>{{v.redeemed_at|default:"-"}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</div>
+
+<!-- ✅ DataTables JS & CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    $('#voucherTable').DataTable({
+        "pageLength": 20,
+        "lengthMenu": [10, 20, 50, 100],
+        "order": [[0, "desc"]]  // Default sort by DateTime descending
+    });
+});
+</script>
+{% endblock %}

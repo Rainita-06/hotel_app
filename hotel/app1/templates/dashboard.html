@@ -1,0 +1,30 @@
+{% extends "base.html" %} 
+{% block title %}Hotel Dashboard{% endblock %}
+{% block content %} 
+<div class="container mt-4"> 
+  <h2>Hotel Dashboard - Generate QR</h2> 
+  <form method="post"> {% csrf_token %} 
+    <div class="mb-3"> <label>Room No</label> 
+      <input type="text" name="room_no" class="form-control" required> 
+    </div> 
+    <div class="mb-3"> 
+      <label>Customer Name</label> 
+      <input type="text" name="guest_name" class="form-control" required> 
+    </div> 
+    <div class="mb-3"> 
+      <label>Date</label> 
+      <input type="date" name="date" class="form-control" required> 
+    </div> 
+    <div class="mb-3"> 
+      <label>Adults</label> 
+      <input type="number" name="adults" class="form-control" min="1" value="1" required> 
+    </div> <div class="mb-3"> 
+      <label>Kids</label> 
+      <input type="number" name="kids" class="form-control" min="0" value="0" required> 
+    </div> 
+    <button type="submit" class="btn btn-primary">Generate QR</button> 
+  </form> {% if qr_image %} 
+  <div class="mt-4 text-center"> 
+    <h5>Generated QR Code</h5> 
+    <img src="data:image/png;base64,{{ qr_image }}" alt="QR Code"> <p class="mt-3">Share this QR:</p> 
+    <a class="btn btn-success" href="https://web.whatsapp.com/send?text=Here%20is%20your%20Breakfast%20Voucher%20(Room%20{{voucher.room_no}}%2C%20{{voucher.customer_name}}%2C%20Adults:{{voucher.adults}}%2C%20Kids:{{voucher.kids}})%20{{voucher.qr_code}}" target="_blank"> Share on WhatsApp </a> </div> {% endif %} </div> {% endblock %}

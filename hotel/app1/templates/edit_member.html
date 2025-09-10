@@ -1,0 +1,7 @@
+<h3>Edit Member: {{ member.full_name }}</h3>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Update</button>
+  <a href="{% url 'member_list' %}" class="btn btn-secondary">Cancel</a>
+</form>

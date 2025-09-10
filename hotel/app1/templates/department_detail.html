@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Department Details{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{{ department.name }}</h2>
+  <p>{{ department.description }}</p>
+  <h4>👥 Users</h4>
+  <ul>
+    {% for user in users %}
+      <li>{{ user.full_name }} ({{ user.username }})</li>
+    {% empty %}
+      <li>No users in this department.</li>
+    {% endfor %}
+  </ul>
+
+  <h4>📌 Complaints</h4>
+  <ul>
+    {% for c in complaints %}
+      <li>{{ c.description }} - <strong>{{ c.status }}</strong></li>
+    {% empty %}
+      <li>No complaints linked to this department.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
