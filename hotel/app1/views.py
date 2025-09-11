@@ -894,8 +894,8 @@ from django.utils import timezone
 import pandas as pd
 
 def breakfast_voucher_report(request):
-    vouchers = Voucher.objects.all().values()
-    df = pd.DataFrame(vouchers)
+    vouchers = Voucher.objects.all()
+    df =  pd.DataFrame(Voucher.objects.all().values())
 
     # ✅ Convert timezone-aware datetimes to naive datetimes
     for col in df.select_dtypes(include=['datetimetz']).columns:
@@ -1073,32 +1073,96 @@ from rest_framework import status
 from datetime import date
 from .models import Voucher
 
+# @api_view(["GET"])
+# def validate_voucher(request):
+#     code = request.GET.get("code")
+#     if not code:
+#         return Response({"message": "Voucher code is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+#     try:
+#         voucher = Voucher.objects.get(voucher_code=code)
+#     except Voucher.DoesNotExist:
+#         return Response({"message": "Invalid voucher code."}, status=status.HTTP_404_NOT_FOUND)
+
+#     # 1. Expired after check-out
+#     if voucher.is_expired():
+#         return Response({"message": "❌ Voucher has expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+#     # 2. Valid & not used yet
+#     if voucher.is_valid_today():
+#         voucher.mark_scanned_today()
+#         return Response({"message": "✅ Voucher redeemed successfully for today."})
+
+#     # 3. Already used or not valid date
+#     return Response(
+#         {"message": "❌ Voucher already used today or not valid for today."},
+#         status=status.HTTP_400_BAD_REQUEST,
+#     )
+
+from django.utils import timezone
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Voucher
+from datetime import date
+
 @api_view(["GET"])
 def validate_voucher(request):
+    """
+    Validate a voucher when its QR code is scanned.
+    Increments scan_count, updates redeemed flags, and
+    returns status + updated fields.
+    """
     code = request.GET.get("code")
     if not code:
-        return Response({"message": "Voucher code is required."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "Voucher code is required."},
+                        status=status.HTTP_400_BAD_REQUEST)
 
     try:
         voucher = Voucher.objects.get(voucher_code=code)
     except Voucher.DoesNotExist:
-        return Response({"message": "Invalid voucher code."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Invalid voucher code."},
+                        status=status.HTTP_404_NOT_FOUND)
 
-    # 1. Expired after check-out
+    # 1. Expired?
     if voucher.is_expired():
-        return Response({"message": "❌ Voucher has expired."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "❌ Voucher has expired."},
+                        status=status.HTTP_400_BAD_REQUEST)
 
-    # 2. Valid & not used yet
+    # 2. Valid for today?
     if voucher.is_valid_today():
-        voucher.mark_scanned_today()
-        return Response({"message": "✅ Voucher redeemed successfully for today."})
+        # ✅ increment scan_count and record history
+        today = date.today().isoformat()
+        if today not in (voucher.scan_history or []):
+            voucher.scan_history.append(today)
+        voucher.scan_count = (voucher.scan_count or 0) + 1
 
-    # 3. Already used or not valid date
-    return Response(
-        {"message": "❌ Voucher already used today or not valid for today."},
-        status=status.HTTP_400_BAD_REQUEST,
-    )
+        # ✅ mark as redeemed (if not already)
+        if not voucher.redeemed:
+            voucher.redeemed = True
+            voucher.redeemed_at = timezone.now()
 
+        voucher.save(update_fields=["scan_history",
+                                    "scan_count",
+                                    "redeemed",
+                                    "redeemed_at"])
+
+        return Response({
+            "success": True,
+            "message": "✅ Voucher redeemed successfully for today.",
+            "scan_count": voucher.scan_count,
+            "redeemed": voucher.redeemed,
+            "redeemed_at": voucher.redeemed_at,
+        })
+
+    # 3. Already used today or not valid
+    return Response({
+        "success": False,
+        "message": "❌ Voucher already used today or not valid for today.",
+        "scan_count": voucher.scan_count,
+        "redeemed": voucher.redeemed,
+        "redeemed_at": voucher.redeemed_at,
+    }, status=status.HTTP_400_BAD_REQUEST)
 
    
 @login_required
@@ -1350,6 +1414,8 @@ from .forms import GymMemberForm, GymVisitorForm
 # ======================
 # MEMBER
 # ======================
+from django.contrib import messages
+
 @login_required
 def add_member(request):
     if request.method == "POST":
@@ -1357,18 +1423,55 @@ def add_member(request):
         if form.is_valid():
             member = form.save(commit=False)
 
-            # Generate QR
+            # ✅ save pin as password field also
+            member.password = member.pin  
+
+            # ✅ Generate QR
+            import io, qrcode, base64
             qr_img = qrcode.make(member.customer_code)
             buffer = io.BytesIO()
             qr_img.save(buffer, format="PNG")
             qr_data = base64.b64encode(buffer.getvalue()).decode()
             member.qr_code = member.customer_code
             member.qr_code_image = f"data:image/png;base64,{qr_data}"
+
             member.save()
+
+            # ✅ Success message
+            messages.success(request, f"Member '{member.full_name}' has been added successfully!")
+
             return redirect("member_list")
+        else:
+            # form invalid → error messages automatically
+            messages.error(request, "Please correct the errors below.")
     else:
         form = GymMemberForm()
     return render(request, "add_member.html", {"form": form})
+
+@login_required
+def edit_member(request, member_id):
+    member = get_object_or_404(GymMember, pk=member_id)
+    if request.method == "POST":
+        form = GymMemberForm(request.POST, instance=member)
+        if form.is_valid():
+            member = form.save(commit=False)
+
+            # ✅ Update QR if customer_code changed
+            if member.customer_code and (not member.qr_code or member.customer_code != member.qr_code):
+                import io, qrcode, base64
+                qr_img = qrcode.make(member.customer_code)
+                buffer = io.BytesIO()
+                qr_img.save(buffer, format="PNG")
+                qr_data = base64.b64encode(buffer.getvalue()).decode()
+                member.qr_code = member.customer_code
+                member.qr_code_image = f"data:image/png;base64,{qr_data}"
+
+            member.save()
+            return redirect("member_list")
+    else:
+        form = GymMemberForm(instance=member)
+    return render(request, "edit_member.html", {"form": form, "member": member})
+
 
 
 @login_required
@@ -1440,27 +1543,7 @@ def export_visits(request):
     return response
 # ... keep previous imports and functions ...
 
-@login_required
-def edit_member(request, member_id):
-    member = get_object_or_404(GymMember, pk=member_id)
-    if request.method == "POST":
-        form = GymMemberForm(request.POST, instance=member)
-        if form.is_valid():
-            member = form.save(commit=False)
-            # Update QR if customer_code changed
-            if member.customer_code and (not member.qr_code or member.customer_code != member.qr_code):
-                import io, qrcode, base64
-                qr_img = qrcode.make(member.customer_code)
-                buffer = io.BytesIO()
-                qr_img.save(buffer, format="PNG")
-                qr_data = base64.b64encode(buffer.getvalue()).decode()
-                member.qr_code = member.customer_code
-                member.qr_code_image = f"data:image/png;base64,{qr_data}"
-            member.save()
-            return redirect("member_list")
-    else:
-        form = GymMemberForm(instance=member)
-    return render(request, "edit_member.html", {"form": form, "member": member})
+
 
 
 @login_required

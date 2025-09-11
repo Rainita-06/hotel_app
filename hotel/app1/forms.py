@@ -3,8 +3,8 @@ from .models import GymMember, GymVisitor
 
 
 class GymMemberForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=False)
-    confirm_password = forms.CharField(widget=forms.PasswordInput, required=False)
+    pin = forms.CharField(widget=forms.PasswordInput, required=True)
+    confirm_password = forms.CharField(widget=forms.PasswordInput, required=True)
 
     class Meta:
         model = GymMember
@@ -12,14 +12,17 @@ class GymMemberForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        pwd = cleaned_data.get("password")
+        pwd = cleaned_data.get("pin")
         cpwd = cleaned_data.get("confirm_password")
+
         if pwd and cpwd and pwd != cpwd:
-            raise forms.ValidationError("Passwords do not match!")
+            raise forms.ValidationError("Pin and Confirm Password do not match!")
         return cleaned_data
+
 
 
 class GymVisitorForm(forms.ModelForm):
     class Meta:
         model = GymVisitor
         fields ='__all__'
+

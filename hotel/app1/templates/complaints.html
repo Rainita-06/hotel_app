@@ -25,12 +25,18 @@
 
 <!-- Filter Buttons + New Request -->
 <div class="d-flex justify-content-between mb-3">
-  <div>
-    <a href="?status=Pending" class="btn btn-sm status-btn {% if status_filter == 'Pending' %}active{% endif %}">Pending</a>
-    <a href="?status=Closed" class="btn btn-sm status-btn {% if status_filter == 'Closed' %}active{% endif %}">Closed</a>
-    <a href="?status=On Hold" class="btn btn-sm status-btn {% if status_filter == 'On Hold' %}active{% endif %}">On Hold</a>
-    <a href="?status=All" class="btn btn-sm status-btn {% if status_filter == 'All' %}active{% endif %}">All</a>
-  </div>
+  <div class="dropdown">
+  <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    {% if status_filter %}{{ status_filter }}{% else %}Status{% endif %}
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+    <li><a class="dropdown-item {% if status_filter == 'Pending' %}active{% endif %}" href="?status=Pending">NEW</a></li>
+    <li><a class="dropdown-item {% if status_filter == 'Closed' %}active{% endif %}" href="?status=Closed">Closed</a></li>
+    <li><a class="dropdown-item {% if status_filter == 'On Hold' %}active{% endif %}" href="?status=On Hold">In Progress</a></li>
+    <li><a class="dropdown-item {% if status_filter == 'All' %}active{% endif %}" href="?status=All">All</a></li>
+  </ul>
+</div>
+
   <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#addComplaintModal">+ New Request</button>
 </div>
 
