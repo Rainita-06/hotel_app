@@ -1,50 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Gym Members{% endblock %}
-
 {% block content %}
-<h3 class="mb-4">🏋️ Gym Members</h3>
+<div class="container mt-4">
+    <h3><b>📋 Gym Members</b></h3>
 
-<a href="{% url 'add_member' %}" class="btn btn-primary mb-3">+ Add New Member</a>
+    <!-- Search Filter -->
+    <form method="get" class="form-inline mb-3">
+        <input type="text" name="search" placeholder="Search by Name or ID" class="form-control mr-2"
+               value="{{ request.GET.search }}">
+        <button type="submit" class="btn btn-info">Search</button>
+        <a href="{% url 'member_list' %}" class="btn btn-secondary ml-2">Reset</a>
+    </form>
 
-<table id="memberTable" class="table-gym display">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Full Name</th>
-      <th>NIK</th>
-      <th>City</th>
-      <th>Gender</th>
-      <th>Phone</th>
-      <th>Email</th>
-      <th>Occupation</th>
-      <th>Status</th>
-      <th>Start Date</th>
-      <th>End Date</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for member in members %}
-    <tr>
-      <td>{{ member.member_id }}</td>
-      <td>{{ member.full_name }}</td>
-      <td>{{ member.nik }}</td>
-      <td>{{ member.city }}</td>
-      <td>{{ member.gender }}</td>
-      <td>{{ member.phone }}</td>
-      <td>{{ member.email }}</td>
-      <td>{{ member.occupation }}</td>
-      <td>{{ member.status }}</td>
-      <td>{{ member.start_date }}</td>
-      <td>{{ member.end_date }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <form method="get" class="mb-3">
+        <button type="submit" name="export" value="1" class="btn btn-success">Export</button>
+    </form>
 
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    new DataTable("#memberTable", { responsive: true, pageLength: 10 });
-  });
-</script>
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Customer ID</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Expiry</th>
+                <th>QR Code</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in members %}
+            <tr>
+                <td>{{ m.customer_code }}</td>
+                <td>{{ m.full_name }}</td>
+                <td>{{ m.phone }}</td>
+                <td>{{ m.email }}</td>
+                <td>{{ m.status_display|safe }}</td>
+                <td>{{ m.expiry_date }}</td>
+                <td>
+                    {% if m.qr_code_image %}
+                        <img src="{{ m.qr_code_image.url }}" width="80" alt="QR Code">
+
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- ✅ Bootstrap 5 Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-info dropdown-toggle" 
+                                type="button" 
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false">
+                            Action
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'edit_member' m.member_id %}">✏️ Edit</a></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'delete_member' m.member_id %}" 
+                                   onclick="return confirm('Are you sure?')">🗑️ Delete</a></li>
+                            <li><a class="dropdown-item" 
+                                   href="https://web.whatsapp.com/send?phone={{ m.phone }}&text=Hi%20{{m.full_name}},%20here%20is%20your%20Gym%20QR%20Code:%20{{request.build_absolute_uri}}media/qr/{{m.customer_code}}.png"
+                                   target="_blank">📲 Share via WhatsApp</a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No members found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

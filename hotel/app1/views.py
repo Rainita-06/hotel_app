@@ -787,7 +787,7 @@ import qrcode
 import io
 import base64
 from urllib.parse import quote
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.core.files.base import ContentFile
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -1399,157 +1399,369 @@ def service_report(request):
     return render(request, "service_report.html", ctx)
 
 
-import io
-import qrcode
-import base64
-import csv
+# import io
+# import qrcode
+# import base64
+# import csv
+# from django.shortcuts import render, redirect, get_object_or_404
+# from django.http import HttpResponse
+# from django.contrib.auth.decorators import login_required
+# from django.utils.timezone import now
+# from .models import GymMember, GymVisitor, GymVisit
+# from .forms import GymMemberForm, GymVisitorForm
+
+
+# # ======================
+# # MEMBER
+# # ======================
+# from django.contrib import messages
+
+# @login_required
+# def add_member(request):
+#     if request.method == "POST":
+#         form = GymMemberForm(request.POST)
+#         if form.is_valid():
+#             member = form.save(commit=False)
+
+#             # ✅ save pin as password field also
+#             member.password = member.pin  
+
+#             # ✅ Generate QR
+#             import io, qrcode, base64
+#             qr_img = qrcode.make(member.customer_code)
+#             buffer = io.BytesIO()
+#             qr_img.save(buffer, format="PNG")
+#             qr_data = base64.b64encode(buffer.getvalue()).decode()
+#             member.qr_code = member.customer_code
+#             member.qr_code_image = f"data:image/png;base64,{qr_data}"
+
+#             member.save()
+
+#             # ✅ Success message
+#             messages.success(request, f"Member '{member.full_name}' has been added successfully!")
+
+#             return redirect("member_list")
+#         else:
+#             # form invalid → error messages automatically
+#             messages.error(request, "Please correct the errors below.")
+#     else:
+#         form = GymMemberForm()
+#     return render(request, "add_member.html", {"form": form})
+
+# @login_required
+# def edit_member(request, member_id):
+#     member = get_object_or_404(GymMember, pk=member_id)
+#     if request.method == "POST":
+#         form = GymMemberForm(request.POST, instance=member)
+#         if form.is_valid():
+#             member = form.save(commit=False)
+
+#             # ✅ Update QR if customer_code changed
+#             if member.customer_code and (not member.qr_code or member.customer_code != member.qr_code):
+#                 import io, qrcode, base64
+#                 qr_img = qrcode.make(member.customer_code)
+#                 buffer = io.BytesIO()
+#                 qr_img.save(buffer, format="PNG")
+#                 qr_data = base64.b64encode(buffer.getvalue()).decode()
+#                 member.qr_code = member.customer_code
+#                 member.qr_code_image = f"data:image/png;base64,{qr_data}"
+
+#             member.save()
+#             return redirect("member_list")
+#     else:
+#         form = GymMemberForm(instance=member)
+#     return render(request, "edit_member.html", {"form": form, "member": member})
+
+
+
+# @login_required
+# def member_list(request):
+#     members = GymMember.objects.all()
+#     return render(request, "member_list.html", {"members": members})
+
+
+# @login_required
+# def export_members(request):
+#     response = HttpResponse(content_type="text/csv")
+#     response["Content-Disposition"] = "attachment; filename=members.csv"
+#     writer = csv.writer(response)
+#     writer.writerow([
+#         "Customer ID", "Name", "Phone", "Email", "City", "Start Date", "End Date", "Status"
+#     ])
+#     for m in GymMember.objects.all():
+#         writer.writerow([m.customer_code, m.full_name, m.phone, m.email, m.city, m.start_date, m.end_date, m.status])
+#     return response
+
+
+# # ======================
+# # VISITOR
+# # ======================
+# @login_required
+# def visitor_check(request):
+#     if request.method == "POST":
+#         member_id = request.POST.get("member_id")
+#         try:
+#             member = GymMember.objects.get(customer_code=member_id)
+#             return render(request, "gym/visitor_check.html", {"member": member})
+#         except GymMember.DoesNotExist:
+#             return render(request, "gym/visitor_check.html", {"error": "Member not found"})
+#     return render(request, "visitor_check.html")
+
+
+# @login_required
+# def visitor_register(request):
+#     if request.method == "POST":
+#         form = GymVisitorForm(request.POST)
+#         if form.is_valid():
+#             visitor = form.save()
+#             GymVisit.objects.create(visitor=visitor, checked_by_user=request.user, visit_at=now())
+#             return redirect("visit_report")
+#     else:
+#         form = GymVisitorForm()
+#     return render(request, "visitor_register.html", {"form": form})
+
+
+# # ======================
+# # VISIT REPORT
+# # ======================
+# @login_required
+# def visit_report(request):
+#     visits = GymVisit.objects.select_related("member", "visitor", "checked_by_user").all().order_by("-visit_at")
+#     return render(request, "visit_report.html", {"visits": visits})
+
+
+# @login_required
+# def export_visits(request):
+#     response = HttpResponse(content_type="text/csv")
+#     response["Content-Disposition"] = "attachment; filename=visits.csv"
+#     writer = csv.writer(response)
+#     writer.writerow(["ID", "Customer ID", "Name", "Date Time", "Admin"])
+#     for v in GymVisit.objects.all():
+#         member_code = v.member.customer_code if v.member else ""
+#         name = v.member.full_name if v.member else (v.visitor.full_name if v.visitor else "")
+#         writer.writerow([v.visit_id, member_code, name, v.visit_at, v.checked_by_user.username])
+#     return response
+# # ... keep previous imports and functions ...
+
+
+
+
+# @login_required
+# def delete_member(request, member_id):
+#     member = get_object_or_404(GymMember, pk=member_id)
+#     if request.method == "POST":
+#         member.delete()
+#         return redirect("member_list")
+#     return render(request, "delete_member.html", {"member": member})
+# views.py
+import io, base64, qrcode
+import pandas as pd
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from django.utils.timezone import now
-from .models import GymMember, GymVisitor, GymVisit
-from .forms import GymMemberForm, GymVisitorForm
+from django.http import HttpResponse, JsonResponse
+from .models import GymMember
 
 
-# ======================
-# MEMBER
-# ======================
-from django.contrib import messages
+# Generate unique code
+def generate_customer_code():
+    last = GymMember.objects.order_by("-member_id").first()
+    if last:
+        number = int(last.customer_code.replace("FGS", "")) + 1
+    else:
+        number = 1
+    return f"FGS{number:04d}"
 
-@login_required
+
 def add_member(request):
     if request.method == "POST":
-        form = GymMemberForm(request.POST)
-        if form.is_valid():
-            member = form.save(commit=False)
+        full_name = request.POST.get("full_name")
+        nik = request.POST.get("nik")
+        address = request.POST.get("address")
+        city = request.POST.get("city")
+        place_of_birth = request.POST.get("place_of_birth")
+        date_of_birth = request.POST.get("date_of_birth") or None
+        religion = request.POST.get("religion")
+        gender = request.POST.get("gender")
+        occupation = request.POST.get("occupation")
+        phone = request.POST.get("phone")
+        email = request.POST.get("email")
+        pin = request.POST.get("pin")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
 
-            # ✅ save pin as password field also
-            member.password = member.pin  
+        if password != confirm_password:
+            return render(
+                request,
+                "add_member.html",
+                {"error": "Password and Confirm Password do not match."},
+            )
 
-            # ✅ Generate QR
-            import io, qrcode, base64
-            qr_img = qrcode.make(member.customer_code)
-            buffer = io.BytesIO()
-            qr_img.save(buffer, format="PNG")
-            qr_data = base64.b64encode(buffer.getvalue()).decode()
-            member.qr_code = member.customer_code
-            member.qr_code_image = f"data:image/png;base64,{qr_data}"
+        # Generate member code and dates
+        customer_code = generate_customer_code()
+        start_date = timezone.now().date()
+        expiry_date = start_date + timedelta(days=90)
 
-            member.save()
+        # -----------------------------
+        # QR-code logic (same as voucher)
+        # -----------------------------
+        # Content you want inside the QR
+        
 
-            # ✅ Success message
-            messages.success(request, f"Member '{member.full_name}' has been added successfully!")
+        # Save model first (without image file)
+        member = GymMember.objects.create(
+            customer_code=customer_code,
+            full_name=full_name,
+            nik=nik,
+            address=address,
+            city=city,
+            place_of_birth=place_of_birth,
+            date_of_birth=date_of_birth,
+            religion=religion,
+            gender=gender,
+            occupation=occupation,
+            phone=phone,
+            email=email,
+            pin=pin,
+            password=password,
+            confirm_password=confirm_password,
+            start_date=start_date,
+            expiry_date=expiry_date,
+            status="Active",
+             # store base64 string if desired
+        )
+        qr_content = member.customer_code
 
-            return redirect("member_list")
-        else:
-            # form invalid → error messages automatically
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = GymMemberForm()
-    return render(request, "add_member.html", {"form": form})
+        # Generate PNG bytes
+        qr_img = qrcode.make(qr_content)
+        buffer = io.BytesIO()
+        qr_img.save(buffer, format="PNG")
 
-@login_required
-def edit_member(request, member_id):
-    member = get_object_or_404(GymMember, pk=member_id)
-    if request.method == "POST":
-        form = GymMemberForm(request.POST, instance=member)
-        if form.is_valid():
-            member = form.save(commit=False)
+        # Base64 string if you need it (optional)
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
 
-            # ✅ Update QR if customer_code changed
-            if member.customer_code and (not member.qr_code or member.customer_code != member.qr_code):
-                import io, qrcode, base64
-                qr_img = qrcode.make(member.customer_code)
-                buffer = io.BytesIO()
-                qr_img.save(buffer, format="PNG")
-                qr_data = base64.b64encode(buffer.getvalue()).decode()
-                member.qr_code = member.customer_code
-                member.qr_code_image = f"data:image/png;base64,{qr_data}"
+        # Save actual PNG file to ImageField
+        file_name = f"member_{member.member_id}.png"
+        member.qr_code_image.save(file_name, ContentFile(buffer.getvalue()), save=True)
 
-            member.save()
-            return redirect("member_list")
-    else:
-        form = GymMemberForm(instance=member)
-    return render(request, "edit_member.html", {"form": form, "member": member})
+        return redirect("member_list")
 
-
-
-@login_required
+    return render(request, "add_member.html")
 def member_list(request):
-    members = GymMember.objects.all()
+    members = GymMember.objects.all().order_by("-created_at")
+
+    search = request.GET.get("search")
+    if search:
+        members = members.filter(
+            Q(full_name__icontains=search) | Q(customer_code__icontains=search)
+        )
+
+    if request.GET.get("export") == "1":
+        df = pd.DataFrame(members.values())
+        for col in df.select_dtypes(include=["datetimetz"]).columns:
+            df[col] = df[col].dt.tz_convert(None)
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = 'attachment; filename="members.xlsx"'
+        df.to_excel(response, index=False)
+        return response
+
     return render(request, "member_list.html", {"members": members})
 
 
-@login_required
-def export_members(request):
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = "attachment; filename=members.csv"
-    writer = csv.writer(response)
-    writer.writerow([
-        "Customer ID", "Name", "Phone", "Email", "City", "Start Date", "End Date", "Status"
-    ])
-    for m in GymMember.objects.all():
-        writer.writerow([m.customer_code, m.full_name, m.phone, m.email, m.city, m.start_date, m.end_date, m.status])
-    return response
+    
+# gym/views.py
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import GymMember
 
+@api_view(["GET"])
+def validate_member_qr(request):
+    code = (request.GET.get("code") or "").strip()
+    try:
+        member = GymMember.objects.get(customer_code=code)
+    except GymMember.DoesNotExist:
+        return Response({"message": "Invalid QR code."}, status=status.HTTP_404_NOT_FOUND)
 
-# ======================
-# VISITOR
-# ======================
+    if member.is_expired():
+        return Response({"message": "❌ Membership expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if member.mark_scanned_today():
+        return Response({"success": True, "message": "✅ Entry allowed.", "scan_count": member.scan_count})
+
+    return Response({"success": False, "message": "❌ Already scanned today."},
+                    status=status.HTTP_400_BAD_REQUEST)
+
+   
+# gym/views.py
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
 @login_required
-def visitor_check(request):
+def scan_gym_page(request):
+    return render(request, "scan_gym.html")
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import GymMember
+from django.utils import timezone
+import qrcode, io, base64
+
+# ---------- EDIT MEMBER ----------
+def edit_member(request, member_id):
+    member = get_object_or_404(GymMember, member_id=member_id)
+
     if request.method == "POST":
-        member_id = request.POST.get("member_id")
-        try:
-            member = GymMember.objects.get(customer_code=member_id)
-            return render(request, "gym/visitor_check.html", {"member": member})
-        except GymMember.DoesNotExist:
-            return render(request, "gym/visitor_check.html", {"error": "Member not found"})
-    return render(request, "visitor_check.html")
+        full_name = request.POST.get("full_name")
+        address = request.POST.get("address")
+        phone = request.POST.get("phone")
+        email = request.POST.get("email")
+        city = request.POST.get("city")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if password and confirm_password and password != confirm_password:
+            messages.error(request, "❌ Password mismatch.")
+            return render(request, "edit_member.html", {"member": member})
+
+        # Update fields
+        member.full_name = full_name
+        member.address = address
+        member.phone = phone
+        member.email = email
+        member.city = city
+        if password:
+            member.password = password
+
+        # Re-generate QR if phone or name changed
+        qr_content = f"{member.customer_code}|{member.full_name}|{member.phone}"
+        qr = qrcode.make(qr_content)
+        buffer = io.BytesIO()
+        qr.save(buffer, format="PNG")
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+        member.qr_code = qr_content
+        member.qr_code_image = qr_base64
+
+        if member.status == "Inactive":
+            member.qr_code_image.delete(save=False)
+            member.qr_code_image = None
+            member.qr_expired = True
+
+        member.save()
+        messages.success(request, "✅ Member updated successfully.")
+        return redirect("member_list")
+
+    return render(request, "edit_member.html", {"member": member})
 
 
-@login_required
-def visitor_register(request):
-    if request.method == "POST":
-        form = GymVisitorForm(request.POST)
-        if form.is_valid():
-            visitor = form.save()
-            GymVisit.objects.create(visitor=visitor, checked_by_user=request.user, visit_at=now())
-            return redirect("visit_report")
-    else:
-        form = GymVisitorForm()
-    return render(request, "visitor_register.html", {"form": form})
-
-
-# ======================
-# VISIT REPORT
-# ======================
-@login_required
-def visit_report(request):
-    visits = GymVisit.objects.select_related("member", "visitor", "checked_by_user").all().order_by("-visit_at")
-    return render(request, "visit_report.html", {"visits": visits})
-
-
-@login_required
-def export_visits(request):
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = "attachment; filename=visits.csv"
-    writer = csv.writer(response)
-    writer.writerow(["ID", "Customer ID", "Name", "Date Time", "Admin"])
-    for v in GymVisit.objects.all():
-        member_code = v.member.customer_code if v.member else ""
-        name = v.member.full_name if v.member else (v.visitor.full_name if v.visitor else "")
-        writer.writerow([v.visit_id, member_code, name, v.visit_at, v.checked_by_user.username])
-    return response
-# ... keep previous imports and functions ...
-
-
-
-
-@login_required
+# ---------- DELETE MEMBER ----------
 def delete_member(request, member_id):
-    member = get_object_or_404(GymMember, pk=member_id)
+    member = get_object_or_404(GymMember, member_id=member_id)
+
     if request.method == "POST":
         member.delete()
+        messages.success(request, "✅ Member deleted successfully.")
         return redirect("member_list")
+
     return render(request, "delete_member.html", {"member": member})

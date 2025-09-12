@@ -67,6 +67,7 @@ urlpatterns = [
     path("checklists/edit/<int:checklist_id>/", views.edit_checklist, name="edit_checklist"),
     path("checklists/delete/<int:checklist_id>/", views.delete_checklist, name="delete_checklist"),
     path("checkin/", views.create_voucher_checkin, name="checkin_form"),
+    path("scan/gym/", views.scan_gym_page, name="scan_gym_page"),
     path("voucher/<int:voucher_id>/", views.voucher_detail_public, name="voucher_detail_public"),
     path("scan/<str:code>/", views.scan_voucher, name="scan_voucher"),
     
@@ -85,7 +86,12 @@ urlpatterns = [
     path("checklists/<int:checklist_id>/add-item/", views.add_item, name="add_item"),
     path("items/edit/<int:item_id>/", views.edit_item, name="edit_item"),
     path("items/delete/<int:item_id>/", views.delete_item, name="delete_item"),
+    path("members/<int:member_id>/edit/", views.edit_member, name="edit_member"),
+    path("members/<int:member_id>/delete/", views.delete_member, name="delete_member"),
+    path("members/scan/", views.validate_member_qr, name="validate_member_qr"),
+    
 
+    
     # Add new request type
     path('request-types/add/', views.request_type_add, name='request_type_add'),
 
@@ -100,23 +106,26 @@ urlpatterns = [
     path("voucher/<str:voucher_code>/", views.voucher_landing, name="voucher_landing"),
     path("members/add/", views.add_member, name="add_member"),
     path("members/", views.member_list, name="member_list"),
-    path("members/export/", views.export_members, name="export_members"),
-    path("members/<int:member_id>/edit/", views.edit_member, name="edit_member"),
-    path("members/<int:member_id>/delete/", views.delete_member, name="delete_member"),
+    
+    # path("members/export/", views.export_members, name="export_members"),
+    # path("members/<int:member_id>/edit/", views.edit_member, name="edit_member"),
+    # path("members/<int:member_id>/delete/", views.delete_member, name="delete_member"),
 
-    # Visitors
-    path("visitor/check/", views.visitor_check, name="visitor_check"),
-    path("visitor/register/", views.visitor_register, name="visitor_register"),
+    # # Visitors
+    # path("visitor/check/", views.visitor_check, name="visitor_check"),
+    # path("visitor/register/", views.visitor_register, name="visitor_register"),
 
-    # Reports
-    path("visits/", views.visit_report, name="visit_report"),
-    path("visits/export/", views.export_visits, name="export_visits"),
+    # # Reports
+    # path("visits/", views.visit_report, name="visit_report"),
+    # path("visits/export/", views.export_visits, name="export_visits"),
     # Custom API endpoints
     path("api/vouchers/checked-in/", api_views.checked_in_customers, name="api_checked_in_customers"),
     path("api/vouchers/visits/", api_views.visits_by_date, name="api_visits_by_date"),
     path("api/vouchers/visits-weekly/", api_views.visits_weekly, name="api_visits_weekly"),
     path("api/vouchers/validate/", views.validate_voucher, name="validate_voucher"),
     path("api/complaint-summary/", views.complaint_summary, name="complaint-summary"),
+    # Your REST endpoint (already exists but include for clarity)
+    path("api/members/validate/", views.validate_member_qr, name="validate_member_qr"),
     # QR + Room APIs
     path("api/dashboard/qr/", api_views.QRGenerateAPIView.as_view(), name="api_qr_generate"),
     path("api/room/<int:pk>/", api_views.RoomDetailAPIView.as_view(), name="api_room_detail"),

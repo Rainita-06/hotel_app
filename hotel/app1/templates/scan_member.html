@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 text-center">
+    <h3><b>🔍 Scan Gym Member QR</b></h3>
+
+    <form method="get" action="{% url 'validate_member_qr' %}" class="mt-3">
+        <input type="text" name="code" class="form-control" placeholder="Enter or Scan QR Code" required>
+        <br>
+        <button type="submit" class="btn btn-primary">Validate</button>
+    </form>
+
+    {% if message %}
+        <div class="alert mt-3 {% if success %}alert-success{% else %}alert-danger{% endif %}">
+            {{ message }}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

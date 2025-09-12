@@ -1,87 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Add Gym Member{% endblock %}
-
 {% block content %}
-<h3 class="mb-4 text-primary">➕ Add Gym Member</h3>
-
-<form method="post" class="card p-4 shadow-sm">
-  {% csrf_token %}
-  <div class="row g-3">
-
-    <div class="col-md-6">
-      <label class="form-label">Full Name</label>
-      <input type="text" name="full_name" class="form-control" required>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">National ID (NIK)</label>
-      <input type="text" name="nik" class="form-control" required>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Address</label>
-      <input type="text" name="address" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">City</label>
-      <input type="text" name="city" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Place of Birth</label>
-      <input type="text" name="birth_place" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Date of Birth</label>
-      <input type="date" name="birth_date" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Religion</label>
-      <input type="text" name="religion" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Gender</label>
-      <select name="gender" class="form-select">
-        <option value="">Select</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Occupation</label>
-      <input type="text" name="occupation" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Mobile Phone</label>
-      <input type="text" name="phone" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Email</label>
-      <input type="email" name="email" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Pin</label>
-      <input type="password" name="pin" class="form-control">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Confirm Password</label>
-      <input type="password" name="confirm_password" class="form-control">
-    </div>
-
-  </div>
-
-  <div class="mt-4 text-end">
-    <button type="submit" class="btn btn-primary">Insert</button>
-    <a href="{% url 'member_list' %}" class="btn btn-success">Export</a>
-  </div>
-</form>
+<div class="container mt-4">
+    <h3><b>New Member</b></h3>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <label>Full Name</label>
+                <input type="text" name="full_name" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label>NIK</label>
+                <input type="text" name="nik" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Address</label>
+                <input type="text" name="address" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>City</label>
+                <input type="text" name="city" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Place of Birth</label>
+                <input type="text" name="place_of_birth" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Date of Birth</label>
+                <input type="date" name="date_of_birth" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Religion</label>
+                <input type="text" name="religion" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Gender</label>
+                <select name="gender" class="form-control">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label>Occupation</label>
+                <input type="text" name="occupation" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Phone</label>
+                <input type="text" name="phone" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Pin</label>
+                <input type="text" name="pin" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Password</label>
+                <input type="password" name="password" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" class="form-control" required>
+            </div>
+           
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary">Insert</button>
+    </form>
+</div>
 {% endblock %}

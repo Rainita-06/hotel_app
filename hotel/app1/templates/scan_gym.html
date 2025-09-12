@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 text-center">
+    <h3>📷 Scan Gym Member QR Code</h3>
+    <div id="gym-reader" style="width: 350px; margin: auto;"></div>
+    <div id="gym-scan-result" class="mt-3 alert d-none"></div>
+</div>
+
+<!-- QR Scanner library -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+function onGymScanSuccess(decodedText, decodedResult) {
+    console.log("✅ Member QR detected:", decodedText);
+
+    // Hit the Django REST API
+    fetch(`/api/members/validate/?code=${encodeURIComponent(decodedText)}`)
+        .then(response => response.json())
+        .then(data => {
+            const box = document.getElementById("gym-scan-result");
+            box.classList.remove("d-none");
+            box.innerHTML = data.message || "No message";
+
+            if (data.success) {
+                box.classList.add("alert-success");
+                box.classList.remove("alert-danger");
+            } else {
+                box.classList.add("alert-danger");
+                box.classList.remove("alert-success");
+            }
+
+            // Auto-hide after 9 seconds
+            setTimeout(() => {
+                box.classList.add("d-none");
+                box.innerHTML = "";
+                box.classList.remove("alert-success", "alert-danger");
+            }, 9000);
+        })
+        .catch(err => console.error("Error validating member:", err));
+}
+
+// Initialize the scanner
+const gymScanner = new Html5QrcodeScanner(
+    "gym-reader",
+    { fps: 10, qrbox: { width: 250, height: 250 } }
+);
+gymScanner.render(onGymScanSuccess);
+</script>
+{% endblock %}

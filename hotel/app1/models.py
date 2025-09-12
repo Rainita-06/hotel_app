@@ -542,16 +542,20 @@ class Review(models.Model):  # added
 
 from django.db import models
 from django.contrib.auth.models import User
-
+import io, base64, qrcode
 # =========================
 # GYM MEMBER
 # =========================
 class GymMember(models.Model):
+    STATUS_CHOICES = [
+        ("Active", "Active"),
+        ("Inactive", "Inactive"),
+    ]
     member_id = models.BigAutoField(primary_key=True)
     customer_code = models.CharField(max_length=50, unique=True, blank=False, null=False)  # like FGS0001
     full_name = models.CharField(max_length=100, blank=False, null=False)
     nik = models.CharField(max_length=20, blank=True, null=True)  # national ID
-    address = models.CharField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=False, null=False)
     city = models.CharField(max_length=100, blank=True, null=True)
     place_of_birth = models.CharField(max_length=100, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
@@ -561,22 +565,73 @@ class GymMember(models.Model):
     phone = models.CharField(max_length=20, blank=False, null=False)
     email = models.CharField(max_length=100, blank=True, null=True)
     pin = models.CharField(max_length=10, blank=True, null=True)
-    password = models.CharField(max_length=128, blank=True, null=True)
+    password = models.CharField(max_length=128, blank=False, null=False)
     qr_code = models.TextField(blank=True, null=True)  # store QR data
-    qr_code_image = models.TextField(blank=True, null=True)  # base64 or image path
+    qr_code_image = models.ImageField(upload_to="qr_codes/", null=True, blank=True)  # base64 or image path
+    confirm_password = models.CharField(max_length=128, blank=False, null=False)
 
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
-    status = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Active")
     plan_type = models.CharField(max_length=50, blank=True, null=True)
+    qr_expired = models.BooleanField(default=False) 
 
     created_at = models.DateTimeField(auto_now_add=True)
+       # Manual entry if needed
+    expiry_date = models.DateField(blank=True, null=True)  # Auto 3 months validity
+    check_in_date = models.DateField(blank=True, null=True)
+    check_out_date = models.DateField(blank=True, null=True)
+    unique_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True) 
+
+    
+
+    # Scan tracking
+    scan_count = models.IntegerField(default=0)
+    scan_history = models.JSONField(default=list, blank=True)
+
+    
 
     class Meta:
         db_table = 'gym_member'
 
     def __str__(self):
         return f"{self.customer_code} - {self.full_name}"
+    
+    
+    def is_expired(self):
+        if not self.expiry_date:
+            return False
+        expiry_dt = datetime.combine(self.expiry_date, time(23, 59))
+        if timezone.is_naive(expiry_dt):
+            expiry_dt = timezone.make_aware(expiry_dt, timezone.get_current_timezone())
+        return timezone.now() > expiry_dt
+
+    def is_valid_today(self):
+        today = date.today().isoformat()
+        if self.is_expired():
+            return False
+        if today in (self.scan_history or []):
+            return False
+        # Must be between start_date and expiry_date
+        if self.start_date and self.expiry_date:
+            return self.start_date <= date.today() <= self.expiry_date
+        return True
+
+    def mark_scanned_today(self):
+        if self.is_valid_today():
+            today = date.today().isoformat()
+            if today not in (self.scan_history or []):
+                self.scan_history = list(self.scan_history or [])
+                self.scan_history.append(today)
+                self.scan_count = (self.scan_count or 0) + 1
+                self.save(update_fields=["scan_history", "scan_count"])
+                return True
+        return False
+
+    def status_display(self):
+        if self.is_expired():
+            return format_html('<span style="color:red;font-weight:bold;">Expired</span>')
+        return format_html('<span style="color:green;font-weight:bold;">Active</span>')
 
 
 # =========================
