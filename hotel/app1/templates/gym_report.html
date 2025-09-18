@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3><b>Member GYM - Report</b></h3>
+
+    <!-- Date Range Filter -->
+    <form method="get" class="form-inline mb-3">
+        <input type="date" name="from_date" value="{{ request.GET.from_date }}" class="form-control mr-2">
+        <input type="date" name="to_date" value="{{ request.GET.to_date }}" class="form-control mr-2">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <button type="submit" name="export" value="1" class="btn btn-success ml-2">Export</button>
+    </form>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Customer ID</th>
+                <th>Name</th>
+                <th>Date Time</th>
+                <th>Admin</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in visits %}
+            <tr>
+                <td>{{ v.visit_id }}</td>
+                <td>
+                    {% if v.member %}
+                        {{ v.member.customer_code }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if v.member %}
+                        {{ v.member.full_name }}
+                    {% else %}
+                        {{ v.visitor.full_name }}
+                    {% endif %}
+                </td>
+                <td>{{ v.visit_at }}</td>
+                <td>{{ v.checked_by_user.username }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No visits found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

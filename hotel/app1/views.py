@@ -47,7 +47,7 @@ import base64
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .models import Voucher
+from .models import GymVisit, UserProfile, Voucher
 
 @login_required
 def hotel_dashboard(request):
@@ -300,14 +300,14 @@ def delete_complaint(request, complaint_id):
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import UserGroup, Users, Department
-
+from django.contrib.auth.models import User
 # ----------------------------
 # List User Groups
 # ----------------------------
 def user_groups(request):
     groups = UserGroup.objects.all()
     departments = Department.objects.all()
-    users = Users.objects.all()
+    users = User.objects.all()
     context = {
         'groups': groups,
         'departments': departments,
@@ -365,49 +365,58 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from .models import Users, Department
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 # Master user list
 def master_user(request):
-    users = Users.objects.all().select_related("department")
+    users = User.objects.all()
     departments = Department.objects.all()
     return render(request, "master_user.html", {"users": users, "departments": departments})
 
-
+from django.contrib.auth.models import User
 # Add new user
 def add_user(request):
+    
     if request.method == "POST":
-        full_name = request.POST.get("full_name")
+        username = request.POST.get("username")
         email = request.POST.get("email")
         phone = request.POST.get("phone")
         title = request.POST.get("title")
+        password=request.POST.get("password")
         department_id = request.POST.get("department_id")
         role = request.POST.get("role")
         is_active = True if request.POST.get("is_active") == "on" else False
 
         department = get_object_or_404(Department, department_id=department_id)
-
-        Users.objects.create(
-            full_name=full_name,
+        user = User.objects.create_user(
+            username=username,
             email=email,
+            password=password,
+            is_active=is_active
+        )
+
+        UserProfile.objects.create(
+            user=user,
             phone=phone,
             title=title,
             department=department,
+            
             role=role,
-            is_active=is_active,
-            created_at=timezone.now(),
-            updated_at=timezone.now()
+            # is_active=is_active,
+            # created_at=timezone.now(),
+            # updated_at=timezone.now()
         )
-        messages.success(request, f"User '{full_name}' updated successfully!")
+        messages.success(request, f"User '{username}' updated successfully!")
         return redirect("master_user")
 
 
 # Edit user
 def edit_user(request, user_id):
-    user = get_object_or_404(Users, user_id=user_id)
+    user = get_object_or_404(User, id=user_id)
     departments = Department.objects.all()
 
     if request.method == "POST":
-        user.full_name = request.POST.get("full_name")
+        user.username = request.POST.get("username")
         user.email = request.POST.get("email")
         user.phone = request.POST.get("phone")
         user.title = request.POST.get("title")
@@ -417,7 +426,7 @@ def edit_user(request, user_id):
         user.is_active = True if request.POST.get("is_active") == "on" else False
         user.updated_at = timezone.now()
         user.save()
-        messages.success( request,f"User '{user.full_name}' updated successfully!")
+        messages.success( request,f"User '{user.username}' updated successfully!")
         return redirect("master_user")
 
     return render(request, "edit_user.html", {"user": user, "departments": departments})
@@ -425,7 +434,7 @@ def edit_user(request, user_id):
 
 # Copy user (duplicate entry)
 def copy_user(request, user_id):
-    user = get_object_or_404(Users, user_id=user_id)
+    user = get_object_or_404(User, user_id=user_id)
     user.pk = None  # remove primary key
     user.full_name = f"{user.full_name} (Copy)"
     user.email = f"copy_{user.email}"
@@ -438,9 +447,20 @@ def copy_user(request, user_id):
 
 # Delete user
 def delete_user(request, user_id):
-    user = get_object_or_404(Users, user_id=user_id)
+    # Get the user object
+    user = get_object_or_404(User, id=user_id)
+
+    # Optional: delete the linked UserProfile first
+    try:
+        profile = UserProfile.objects.get(user=user)
+        profile.delete()
+    except UserProfile.DoesNotExist:
+        pass  # No profile to delete, continue
+
+    # Delete the user
     user.delete()
-    messages.success(request,  f"User '{user.full_name}' Deleted successfully!")
+
+    messages.success(request, f"User '{user.username}' deleted successfully!")
     return redirect("master_user")
 
 
@@ -556,6 +576,280 @@ def location_delete(request, location_id):
     location.delete()
     messages.success(request,f"Location {location_name} deleted successfully")
     return redirect('locations_list')
+# -------------------------------
+# Location Families
+# -------------------------------
+def families_list(request):
+    families = LocationFamily.objects.all()
+    if request.method == "POST":
+        name = request.POST.get("name")
+        LocationFamily.objects.create(name=name)
+        messages.success(request, "Family added successfully!")
+        return redirect("locations_list")
+    return families
+
+def family_delete(request, family_id):
+    family = get_object_or_404(LocationFamily, pk=family_id)
+    family.delete()
+    messages.success(request, "Family deleted successfully!")
+    return redirect("locations_list")
+
+
+# -------------------------------
+# Location Types
+# -------------------------------
+def types_list(request):
+    types = LocationType.objects.all()
+    if request.method == "POST":
+        name = request.POST.get("name")
+        LocationType.objects.create(name=name)
+        messages.success(request, "Type added successfully!")
+        return redirect("locations_list")
+    return types
+
+def type_delete(request, type_id):
+    t = get_object_or_404(LocationType, pk=type_id)
+    t.delete()
+    messages.success(request, "Type deleted successfully!")
+    return redirect("locations_list")
+
+
+# -------------------------------
+# Floors
+# -------------------------------
+def floors_list(request):
+    floors = Floor.objects.all()
+    if request.method == "POST":
+        name = request.POST.get("floor_name")
+        floor_number = request.POST.get("floor_number") or 0
+        Floor.objects.create(floor_name=name, floor_number=floor_number)
+        messages.success(request, "Floor added successfully!")
+        return redirect("locations_list")
+    return floors
+
+def floor_delete(request, floor_id):
+    f = get_object_or_404(Floor, pk=floor_id)
+    f.delete()
+    messages.success(request, "Floor deleted successfully!")
+    return redirect("locations_list")
+
+
+# -------------------------------
+# Buildings
+# -------------------------------
+def buildings_list(request):
+    buildings = Building.objects.all()
+    if request.method == "POST":
+        name = request.POST.get("name")
+        Building.objects.create(name=name)
+        messages.success(request, "Building added successfully!")
+        return redirect("locations_list")
+    return buildings
+
+def building_delete(request, building_id):
+    b = get_object_or_404(Building, pk=building_id)
+    b.delete()
+    messages.success(request, "Building deleted successfully!")
+    return redirect("locations_list")
+# -------------------------------
+# Location Families
+# -------------------------------
+def family_form(request, family_id=None):
+    if family_id:
+        family = get_object_or_404(LocationFamily, pk=family_id)
+    else:
+        family = None
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        if family:
+            family.name = name
+            family.save()
+            messages.success(request, "Family updated successfully!")
+        else:
+            LocationFamily.objects.create(name=name)
+            messages.success(request, "Family added successfully!")
+
+        return redirect("locations_list")
+
+    context = {"family": family}
+    return render(request, "family_form.html", context)
+
+
+
+
+
+# -------------------------------
+# Location Types
+# -------------------------------
+def type_form(request, type_id=None):
+    if type_id:
+        loc_type = get_object_or_404(LocationType, pk=type_id)
+    else:
+        loc_type = None
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        if loc_type:
+            loc_type.name = name
+            loc_type.save()
+            messages.success(request, "Type updated successfully!")
+        else:
+            LocationType.objects.create(name=name)
+            messages.success(request, "Type added successfully!")
+
+        return redirect("locations_list")
+
+    context = {"loc_type": loc_type}
+    return render(request, "type_form.html", context)
+
+
+
+
+
+# -------------------------------
+# Floors
+# -------------------------------
+def floor_form(request, floor_id=None):
+    if floor_id:
+        floor = get_object_or_404(Floor, pk=floor_id)
+    else:
+        floor = None
+    
+    if request.method == "POST":
+        name = request.POST.get("floor_name")
+        floor_number = request.POST.get("floor_number") or 0
+        building_id = request.POST.get('building_id')
+        building = Building.objects.get(building_id=building_id)
+        if floor:
+            floor.floor_name = name
+            floor.floor_number = floor_number
+            floor.building=building
+            floor.save()
+            messages.success(request, "Floor updated successfully!")
+        else:
+            Floor.objects.create(floor_name=name, floor_number=floor_number,building=building)
+            messages.success(request, "Floor added successfully!")
+
+        return redirect("locations_list")
+    buildings = Building.objects.all()
+        
+
+    context = {"floor": floor,  'buildings': buildings}
+    return render(request, "floor_form.html", context)
+
+
+
+
+
+# -------------------------------
+# Buildings
+# -------------------------------
+def building_form(request, building_id=None):
+    if building_id:
+        building = get_object_or_404(Building, pk=building_id)
+    else:
+        building = None
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        if building:
+            building.name = name
+            building.save()
+            messages.success(request, "Building updated successfully!")
+        else:
+            Building.objects.create(name=name)
+            messages.success(request, "Building added successfully!")
+
+        return redirect("locations_list")
+
+    context = {"building": building}
+    return render(request, "building_form.html", context)
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+
+from .models import LocationFamily, LocationType, Floor, Building
+def family_add(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        if name:
+            LocationFamily.objects.create(name=name)
+            messages.success(request, "Family added successfully!")
+            return redirect("locations_list")
+    return render(request, "family_form.html")
+
+
+def family_edit(request, family_id):
+    family = get_object_or_404(LocationFamily, pk=family_id)
+    if request.method == "POST":
+        family.name = request.POST.get("name")
+        family.save()
+        messages.success(request, "Family updated successfully!")
+        return redirect("locations_list")
+    return render(request, "family_form.html", {"family": family})
+
+def type_add(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        if name:
+            LocationType.objects.create(name=name)
+            messages.success(request, "Type added successfully!")
+            return redirect("locations_list")
+    return render(request, "type_form.html")
+
+
+def type_edit(request, type_id):
+    t = get_object_or_404(LocationType, pk=type_id)
+    if request.method == "POST":
+        t.name = request.POST.get("name")
+        t.save()
+        messages.success(request, "Type updated successfully!")
+        return redirect("locations_list")
+    return render(request, "type_form.html", {"type": t})
+def floor_add(request):
+    if request.method == "POST":
+        name = request.POST.get("floor_name")
+        floor_number = request.POST.get("floor_number") or 0
+        Floor.objects.create(floor_name=name, floor_number=floor_number)
+        messages.success(request, "Floor added successfully!")
+        return redirect("locations_list")
+    return render(request, "floor_form.html")
+
+
+def floor_edit(request, floor_id):
+    floor = get_object_or_404(Floor, pk=floor_id)
+    if request.method == "POST":
+        floor.floor_name = request.POST.get("floor_name")
+        floor.floor_number = request.POST.get("floor_number") or 0
+        floor.save()
+        messages.success(request, "Floor updated successfully!")
+        return redirect("locations_list")
+    return render(request, "floor_form.html", {"floor": floor})
+def building_add(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        if name:
+            Building.objects.create(name=name)
+            messages.success(request, "Building added successfully!")
+            return redirect("locations_list")
+    return render(request, "building_form.html")
+
+
+def building_edit(request, building_id):
+    building = get_object_or_404(Building, pk=building_id)
+    if request.method == "POST":
+        building.name = request.POST.get("name")
+        building.save()
+        messages.success(request, "Building updated successfully!")
+        return redirect("locations_list")
+    return render(request, "building_form.html", {"building": building})
+
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import RequestType, RequestFamily, WorkFamily, Workflow, Checklist
@@ -1676,6 +1970,28 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import GymMember
 
+# @api_view(["GET"])
+# def validate_member_qr(request):
+#     code = (request.GET.get("code") or "").strip()
+#     try:
+#         member = GymMember.objects.get(customer_code=code)
+#     except GymMember.DoesNotExist:
+#         return Response({"message": "Invalid QR code."}, status=status.HTTP_404_NOT_FOUND)
+
+#     if member.is_expired():
+#         return Response({"message": "❌ Membership expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+#     # Try to mark scan
+#     if member.mark_scanned_today(max_scans_per_day=3):
+#         return Response({"success": True, "message": "✅ Entry allowed.", "scan_count": member.scan_count})
+
+#     return Response({"success": False, "message": "❌ Daily scan limit reached."},
+#                     status=status.HTTP_400_BAD_REQUEST)
+
+# gym/views.py
+from .models import GymMember, GymVisit
+from django.contrib.auth.models import User
+
 @api_view(["GET"])
 def validate_member_qr(request):
     code = (request.GET.get("code") or "").strip()
@@ -1684,14 +2000,25 @@ def validate_member_qr(request):
     except GymMember.DoesNotExist:
         return Response({"message": "Invalid QR code."}, status=status.HTTP_404_NOT_FOUND)
 
+    # Check expiry
     if member.is_expired():
         return Response({"message": "❌ Membership expired."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if member.mark_scanned_today():
-        return Response({"success": True, "message": "✅ Entry allowed.", "scan_count": member.scan_count})
+    # Try to mark scan
+    if member.mark_scanned_today(max_scans_per_day=3):
+        # ✅ Log into GymVisit table
+        GymVisit.objects.create(
+            member=member,
+            checked_by_user=request.user,  # who scanned
+            notes="QR Scan Entry"
+        )
+        return Response({
+            "success": True,
+            "message": "✅ Entry allowed.",
+            "scan_count": member.scan_count
+        })
 
-    return Response({"success": False, "message": "❌ Already scanned today."},
-                    status=status.HTTP_400_BAD_REQUEST)
+    return Response({"success": False, "message": "❌ Daily scan limit reached."}, status=status.HTTP_400_BAD_REQUEST)
 
    
 # gym/views.py
@@ -1709,6 +2036,8 @@ from django.utils import timezone
 import qrcode, io, base64
 
 # ---------- EDIT MEMBER ----------
+from datetime import timedelta
+
 def edit_member(request, member_id):
     member = get_object_or_404(GymMember, member_id=member_id)
 
@@ -1733,27 +2062,47 @@ def edit_member(request, member_id):
         member.city = city
         if password:
             member.password = password
+        
+        # ✅ Extend voucher only if admin ticks/chooses "renew"
+        renew = request.POST.get("renew_membership")  # from a checkbox in form
+        if renew:
+            if not member.is_expired():
+                messages.warning(request, f"⚠️ {member.full_name} membership has not expired yet!")
+                return render(request, "edit_member.html", {"member": member})
+            today = timezone.now().date()
+            member.start_date = today
+            member.expiry_date = today + timedelta(days=90)  # 3 months
+            member.qr_expired = False
 
-        # Re-generate QR if phone or name changed
-        qr_content = f"{member.customer_code}|{member.full_name}|{member.phone}"
-        qr = qrcode.make(qr_content)
-        buffer = io.BytesIO()
-        qr.save(buffer, format="PNG")
-        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
-        member.qr_code = qr_content
-        member.qr_code_image = qr_base64
+            # 🔄 Re-generate QR
+            qr_content = member.customer_code
 
+        # Generate PNG bytes
+            qr_img = qrcode.make(qr_content)
+            buffer = io.BytesIO()
+            qr_img.save(buffer, format="PNG")
+
+        # Base64 string if you need it (optional)
+            qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+        # Save actual PNG file to ImageField
+            file_name = f"member_{member.member_id}.png"
+            member.qr_code_image.save(file_name, ContentFile(buffer.getvalue()), save=True)
+
+            
+
+        # If inactive → expire QR
         if member.status == "Inactive":
-            member.qr_code_image.delete(save=False)
+            if member.qr_code_image:
+                member.qr_code_image.delete(save=False)
             member.qr_code_image = None
             member.qr_expired = True
 
         member.save()
-        messages.success(request, "✅ Member updated successfully.")
+        messages.success(request, f"{member.full_name} ✅ Member updated successfully.")
         return redirect("member_list")
 
     return render(request, "edit_member.html", {"member": member})
-
 
 # ---------- DELETE MEMBER ----------
 def delete_member(request, member_id):
@@ -1765,3 +2114,68 @@ def delete_member(request, member_id):
         return redirect("member_list")
 
     return render(request, "delete_member.html", {"member": member})
+
+# gym/views.py
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+
+@login_required
+def gym_report(request):
+    visits = GymVisit.objects.select_related("member", "visitor", "checked_by_user").order_by("-visit_at")
+
+    # Date filter
+    from_date = request.GET.get("from_date")
+    to_date = request.GET.get("to_date")
+    if from_date and to_date:
+        visits = visits.filter(visit_at__date__range=[from_date, to_date])
+
+    # Export to Excel
+    if request.GET.get("export") == "1":
+        import pandas as pd
+        df = pd.DataFrame(list(visits.values(
+            "visit_id",
+            "member__customer_code",
+            "member__full_name",
+            "visitor__full_name",
+            "visit_at",
+            "checked_by_user__username",
+        )))
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = 'attachment; filename="gym_report.xlsx"'
+        # Convert all datetime columns to timezone-naive
+        for col in df.select_dtypes(include=["datetimetz"]).columns:
+            df[col] = df[col].dt.tz_localize(None)
+
+        df.to_excel(response, index=False)
+        return response
+
+    return render(request, "gym_report.html", {"visits": visits})
+from django.shortcuts import render
+from django.contrib import messages
+from .models import GymMember
+from django.utils import timezone
+
+def data_checker(request):
+    result = None
+    if request.method == "POST":
+        member_id = request.POST.get("member_id")
+
+        try:
+            member = GymMember.objects.get(customer_code=member_id)
+            today = timezone.now().date()
+
+            if member.status == "Inactive":
+                result = {"status": "Inactive ❌", "color_class": "success"}
+            elif member.expiry_date and member.expiry_date < today:
+                result = {"status": "Expired ⏳", "color_class": "success"}
+            else:
+                result = {"status": "Active ✅", "color_class": "success"}
+
+            result["member"] = member
+
+        except GymMember.DoesNotExist:
+            messages.error(request, f"No member found with ID {member_id}")
+
+    return render(request, "data_checker.html", {"result": result})

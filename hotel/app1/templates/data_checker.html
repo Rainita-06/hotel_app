@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Member GYM - Visitor (Data Checker)</h2>
+
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="member_id">ID Member</label>
+            <input type="text" name="member_id" id="member_id" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Proses</button>
+    </form>
+
+    {% if result %}
+        <div  id="resultBox" class="alert alert-{{ result.color_class }}">
+            <h5>{{ result.member.full_name }}</h5>
+            <p>Status: {{ result.status }}</p>
+            <p>Expiry Date: {{ result.member.expiry_date }}</p>
+        </div>
+    {% endif %}
+</div>
+<script>
+    setTimeout(function() {
+        let box = document.getElementById("resultBox");
+        if (box) {
+            box.style.display = "none";
+        }
+    }, 2000);  // 5000 ms = 5 sec
+</script>
+{% endblock %}

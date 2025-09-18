@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{% if floor %}Edit{% else %}Add{% endif %} Floor</h2>
+
+    <form method="post" class="row g-3">
+        {% csrf_token %}
+        <div class="col-md-6">
+            <label for="floor_name" class="form-label">Floor Name</label>
+            <input type="text" class="form-control" id="floor_name" name="floor_name"
+                   value="{% if floor %}{{ floor.floor_name }}{% endif %}" required>
+        </div>
+
+        <div class="col-md-6">
+            <label for="floor_number" class="form-label">Floor Number</label>
+            <input type="number" class="form-control" id="floor_number" name="floor_number"
+                   value="{% if floor %}{{ floor.floor_number }}{% endif %}">
+        </div>
+         <div class="col-md-6">
+            <label for="building" class="form-label">Building</label>
+            <select name="building_id" class="form-control" required>
+                <option value="">Select Building</option>
+                {% for building in buildings %}
+                    <option value="{{ building.building_id }}"
+                        {% if floor and floor.building.building_id == building.building_id %}selected{% endif %}>
+                        {{ building.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+
+        <div class="col-12 mt-3">
+            <button type="submit" class="btn btn-primary">{% if floor %}Update{% else %}Save{% endif %}</button>
+            <a href="{% url 'locations_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

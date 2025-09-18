@@ -3,11 +3,7 @@
 <div class="container mt-4">
     <h3>✏️ Edit Member - {{ member.full_name }}</h3>
 
-    {% if messages %}
-        {% for msg in messages %}
-            <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
-        {% endfor %}
-    {% endif %}
+    
 
     <form method="post">
         {% csrf_token %}
@@ -44,6 +40,21 @@
     <input class="form-check-input" type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}>
     <label class="form-check-label">Active</label>
   </div>
+  <div class="form-check mt-3">
+  <input type="checkbox" class="form-check-input" 
+         name="renew_membership" 
+         id="renew_membership"
+         {% if not member.is_expired %} disabled {% endif %}>
+  <label class="form-check-label" for="renew_membership">
+    Renew membership for 3 months
+  </label>
+  
+  {% if not member.is_expired %}
+    <small class="text-muted d-block">⚠️ Membership not expired yet, renewal disabled.</small>
+  {% endif %}
+</div>
+
+
         </div>
         <br>
         <button type="submit" class="btn btn-primary">💾 Save</button>

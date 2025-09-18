@@ -35,29 +35,42 @@ class Users(models.Model):  # changed to Users instead of User
     class Meta:
         db_table = 'users'
 
-
+from django.contrib.auth.models import User
 class UserProfile(models.Model):
-    user = models.OneToOneField('Users', models.DO_NOTHING, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile", primary_key=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    title = models.CharField(max_length=120, blank=True, null=True)
+    role = models.CharField(
+        max_length=50,
+        choices=[('admin', 'Admin'), ('employee', 'Employee')],
+        default='employee'
+    )
     avatar_url = models.CharField(max_length=255, blank=True, null=True)
     timezone = models.CharField(max_length=100, blank=True, null=True)
     preferences = models.JSONField(blank=True, null=True)
+    
 
     class Meta:
         db_table = 'user_profile'
+
+    def __str__(self):
+        return self.user.username
 
 
 class UserGroup(models.Model):
     group_id = models.BigAutoField(primary_key=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, blank=False, null=False)
-    users = models.ManyToManyField(Users,blank=False, null=False) # updated
+    users = models.ManyToManyField(User,related_name='user_groups',  # must add related_name
+    blank=True,through='UserGroupMembership',   ) # updated
     name = models.CharField(max_length=120,blank=False, null=False)
     class Meta:
         db_table = 'user_group'
 
 
 class UserGroupMembership(models.Model):
-    user = models.ForeignKey('Users', models.DO_NOTHING)
-    group = models.ForeignKey('UserGroup', models.DO_NOTHING)
+    user= models.ForeignKey(User, models.DO_NOTHING)
+    group = models.ForeignKey(UserGroup, models.DO_NOTHING)
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -78,9 +91,11 @@ class Building(models.Model):
 
 
 class Floor(models.Model):
+    floor_name=models.CharField(max_length=50,blank=False,null=False)
     floor_id = models.BigAutoField(primary_key=True)
     building = models.ForeignKey('Building', models.DO_NOTHING,blank=False, null=False)
     floor_number = models.IntegerField(blank=False, null=False)
+    
 
     class Meta:
         db_table = 'floor'
@@ -474,10 +489,11 @@ class RedemptionLog(models.Model):
     log_id = models.BigAutoField(primary_key=True)
     voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE, related_name="redemption_logs")
     scanned_at = models.DateTimeField(auto_now_add=True)
-    scanned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)  # staff
+    # scanned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)  # staff
     scanner_ip = models.CharField(max_length=60, blank=True, null=True)
     success = models.BooleanField(default=False)
     note = models.CharField(max_length=255, blank=True, null=True)
+    
 
     class Meta:
         db_table = "redemption_log"
@@ -606,27 +622,39 @@ class GymMember(models.Model):
             expiry_dt = timezone.make_aware(expiry_dt, timezone.get_current_timezone())
         return timezone.now() > expiry_dt
 
-    def is_valid_today(self):
+    from datetime import date, datetime
+
+    def is_valid_today(self, max_scans_per_day=3):
         today = date.today().isoformat()
         if self.is_expired():
             return False
-        if today in (self.scan_history or []):
-            return False
-        # Must be between start_date and expiry_date
+    
+    # Count today's scans (assuming scan_history stores timestamps as ISO strings)
+        today_scans = [scan for scan in (self.scan_history or []) if scan.startswith(today)]
+        if len(today_scans) >= max_scans_per_day:
+             return False
+    
+    # Must be between start_date and expiry_date
         if self.start_date and self.expiry_date:
             return self.start_date <= date.today() <= self.expiry_date
         return True
 
-    def mark_scanned_today(self):
-        if self.is_valid_today():
-            today = date.today().isoformat()
-            if today not in (self.scan_history or []):
-                self.scan_history = list(self.scan_history or [])
-                self.scan_history.append(today)
-                self.scan_count = (self.scan_count or 0) + 1
-                self.save(update_fields=["scan_history", "scan_count"])
-                return True
-        return False
+
+    from datetime import datetime, date
+
+    def mark_scanned_today(self, max_scans_per_day=3):
+        if not self.is_valid_today(max_scans_per_day=max_scans_per_day):
+            return False
+    
+    # Ensure scan_history is a list
+        self.scan_history = list(self.scan_history or [])
+    
+    # Store full timestamp instead of just date
+        self.scan_history.append(datetime.now().isoformat())
+        self.scan_count = (self.scan_count or 0) + 1
+        self.save(update_fields=["scan_history", "scan_count"])
+        return True
+
 
     def status_display(self):
         if self.is_expired():

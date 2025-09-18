@@ -19,7 +19,7 @@ class VoucherAdmin(admin.ModelAdmin):
 
 @admin.register(RedemptionLog)
 class RedemptionLogAdmin(admin.ModelAdmin):
-    list_display = ("voucher", "scanned_at", "scanned_by", "success", "scanner_ip")
+    list_display = ("voucher", "scanned_at", "success", "scanner_ip")
     list_filter = ("success",)
 
 # Simple registrations

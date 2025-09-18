@@ -2,14 +2,14 @@
 {% block title %}Edit User{% endblock %}
 
 {% block content %}
-<h2>Edit User - {{ user.full_name }}</h2>
+<h2>Edit User - {{ user.username }}</h2>
 
 <form method="POST">
   {% csrf_token %}
-  <input type="text" name="full_name" class="form-control mb-2" value="{{ user.full_name }}" required>
+  <input type="text" name="username" class="form-control mb-2" value="{{ user.username }}" required>
   <input type="email" name="email" class="form-control mb-2" value="{{ user.email }}" required>
-  <input type="text" name="phone" class="form-control mb-2" value="{{ user.phone }}">
-  <input type="text" name="title" class="form-control mb-2" value="{{ user.title }}">
+  <input type="text" name="phone" class="form-control mb-2" value="{{ user.profile.phone }}">
+  <input type="text" name="title" class="form-control mb-2" value="{{ user.profile.title }}">
   
   <select name="department_id" class="form-control mb-2" required>
     {% for d in departments %}

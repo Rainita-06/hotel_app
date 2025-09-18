@@ -62,12 +62,37 @@ urlpatterns = [
     path('locations/edit/<int:location_id>/', views.location_form, name='location_edit'),
     path('locations/delete/<int:location_id>/', views.location_delete, name='location_delete'),
     path('request-types/', views.request_types_list, name='request_types_list'),
+     path('family/delete/<int:family_id>/', views.family_delete, name='family_delete'),
+      path('type/delete/<int:type_id>/', views.type_delete, name='type_delete'),
+       path('floor/delete/<int:floor_id>/', views.floor_delete, name='floor_delete'),
+        path('building/delete/<int:building_id>/', views.building_delete, name='building_delete'),
     path("checklists/", views.checklist_list, name="checklist_list"),
+     path("families/add/", views.family_form, name="family_add"),
+    path("families/edit/<int:family_id>/", views.family_form, name="family_edit"),
+    path("families/delete/<int:family_id>/", views.family_delete, name="family_delete"),
+
+    # Types
+    path("types/add/", views.type_form, name="type_add"),
+    path("types/edit/<int:type_id>/", views.type_form, name="type_edit"),
+    path("types/delete/<int:type_id>/", views.type_delete, name="type_delete"),
+
+    # Floors
+    path("floors/add/", views.floor_form, name="floor_add"),
+    path("floors/edit/<int:floor_id>/", views.floor_form, name="floor_edit"),
+    path("floors/delete/<int:floor_id>/", views.floor_delete, name="floor_delete"),
+
+    # Buildings
+    path("buildings/add/", views.building_form, name="building_add"),
+    path("buildings/edit/<int:building_id>/", views.building_form, name="building_edit"),
+    path("buildings/delete/<int:building_id>/", views.building_delete, name="building_delete"),
     path("checklists/add/", views.add_checklist, name="add_checklist"),
     path("checklists/edit/<int:checklist_id>/", views.edit_checklist, name="edit_checklist"),
     path("checklists/delete/<int:checklist_id>/", views.delete_checklist, name="delete_checklist"),
     path("checkin/", views.create_voucher_checkin, name="checkin_form"),
     path("scan/gym/", views.scan_gym_page, name="scan_gym_page"),
+    path("gym/report/", views.gym_report, name="gym_report"),
+    path("data-checker/", views.data_checker, name="data_checker"),
+     
     path("voucher/<int:voucher_id>/", views.voucher_detail_public, name="voucher_detail_public"),
     path("scan/<str:code>/", views.scan_voucher, name="scan_voucher"),
     
