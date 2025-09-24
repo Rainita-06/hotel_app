@@ -13,16 +13,18 @@ def send_notification(user_id, message):
 
 @shared_task
 def check_sla():
-    """Run every 5 minutes to escalate overdue complaints"""
     now = timezone.now()
-    overdue_complaints = Complaint.objects.filter(status__in=["ASSIGNED", "ACCEPTED", "IN_PROGRESS"], sla_start__isnull=False)
-    for c in overdue_complaints:
-        sla_limit = c.sla_start + timedelta(hours=4)  # Example: 4 hours SLA
-        if now > sla_limit:
+    overdue = Complaint.objects.filter(
+        status__in=["ASSIGNED", "ACCEPTED", "IN_PROGRESS"],
+        sla_start__isnull=False,
+        sla_end__isnull=True          # Only running SLAs
+    )
+    for c in overdue:
+        if now > c.sla_start + timedelta(hours=4):
             c.status = "ESCALATED"
             c.save()
-            # Notify manager or lead
-            if c.department:
-                leads = User.objects.filter(is_staff=True, department=c.department)
-                for lead in leads:
-                    send_notification.delay(lead.id, f"Complaint {c.id} has been escalated.")
+            if c.department and c.department.lead:
+                send_notification.delay(
+                    c.department.lead.id,
+                    f"Complaint {c.id} has been escalated (SLA exceeded)."
+                )

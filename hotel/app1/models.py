@@ -740,6 +740,7 @@ class Complaint(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    assigned_to    = models.ForeignKey(User, related_name="assigned_member", on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=200)
     description = models.TextField()
     location = models.CharField(max_length=50)

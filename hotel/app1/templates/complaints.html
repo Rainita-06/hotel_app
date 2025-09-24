@@ -1,11 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Hotel Services - Dashboard{% endblock %}
+{% block title %}Hotel Services – Dashboard{% endblock %}
 
 {% block content %}
-<h3 class="mb-3">Hotel Services - Dashboard</h3>
+<h3 class="mb-3">Hotel Services – Dashboard</h3>
+
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
   {% include "pop-up.html" %}
-<!-- Top Dashboard Cards -->
+
+
+<!-- Dashboard Cards -->
 <div class="card shadow-sm mb-4">
   <div class="card-header bg-purple text-white fw-semibold">Dashboard</div>
   <div class="card-body">
@@ -13,111 +16,117 @@
   </div>
 </div>
 
+<!-- Notifications -->
 <div class="dropdown ms-auto mb-3">
   <button class="btn btn-light position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="bi bi-bell"></i>
-
-    {% if unread_count > 0 %}
-      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-        {{ unread_count }}
-        <span class="visually-hidden">unread notifications</span>
-      </span>
-    {% endif %}
+    <i class="bi bi-bell-fill"></i>
+    <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
   </button>
-
-  <ul class="dropdown-menu dropdown-menu-end" style="width: 300px;">
-    {% for notif in notifications %}
-      <li class="px-3 py-2 {% if not notif.is_read %}fw-bold{% endif %}">
-        {{ notif.message|truncatechars:50 }}<br>
-        <small class="text-muted">{{ notif.created_on|date:"d-M-Y H:i" }}</small>
-      </li>
-    {% empty %}
-      <li class="px-3 py-2">No notifications</li>
-    {% endfor %}
+  <ul class="dropdown-menu dropdown-menu-end" id="notifMenu" style="width: 300px;">
+    <li class="px-3 py-2">No notifications</li>
   </ul>
 </div>
-
 
 <!-- Filter + New Complaint -->
 <div class="d-flex justify-content-between mb-3">
   <div class="dropdown">
     <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-      {% if status_filter %}{{ status_filter }}{% else %}Status{% endif %}
+      {{ status_filter|default:"Status" }}
     </button>
     <ul class="dropdown-menu">
       {% for s in statuses %}
-        <li><a class="dropdown-item {% if status_filter == s %}active{% endif %}" href="?status={{ s }}">{{ s }}</a></li>
+        <li>
+          <a class="dropdown-item {% if status_filter == s %}active{% endif %}" href="?status={{ s }}">
+            {{ s }}
+          </a>
+        </li>
       {% endfor %}
     </ul>
   </div>
-
   <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#addComplaintModal">+ New Request</button>
 </div>
 
 <!-- Complaints Table -->
 <div class="table-responsive">
-  <table class="table table-bordered table-hover align-middle">
-    <thead class="table-light">
-      <tr>
-        <th>Requester</th>
-        <th>Department</th>
-        <th>Location</th>
-        <th>Title</th>
-        <th>Description</th>
-        <th>Status</th>
-        <th>Owner</th>
-        <th>Created On</th>
-        <th>SLA</th>
-        <th>Due Date</th>
-        {% if is_admin or request.user.is_staff %}<th>Action</th>{% endif %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in complaints %}
-      <tr>
-        <td>{{ c.user.username }}</td>
-        <td>{% if c.department %}{{ c.department.name }}{% else %}-{% endif %}</td>
-        <td>{{ c.location }}</td>
-        <td>{{ c.title }}</td>
-        <td>{{ c.description }}</td>
-        <td>
-          <span class="badge
-            {% if c.status == 'PENDING' %}bg-danger
-            {% elif c.status == 'ASSIGNED' %}bg-primary
-            {% elif c.status == 'ACCEPTED' %}bg-success
-            {% elif c.status == 'IN_PROGRESS' %}bg-warning text-dark
-            {% elif c.status == 'COMPLETED' %}bg-info text-dark
-            {% elif c.status == 'ESCALATED' %}bg-dark
-            {% elif c.status in 'REJECTED,CLOSED' %}bg-secondary
-            {% endif %}">{{ c.status }}</span>
-        </td>
-        <td>{% if c.owner %}{{ c.owner.username }}{% else %}-{% endif %}</td>
-        <td>{{ c.created_on|date:"d-M-Y H:i A" }}</td>
-        <td>{% if c.get_sla_duration %}{{ c.get_sla_duration }}{% elif c.sla_start %}{{ c.sla_start|timesince }} elapsed{% else %}-{% endif %}</td>
-        <td>{% if c.due_date %}{{ c.due_date|date:"d-M-Y H:i A" }}{% else %}-{% endif %}</td>
-        {% if is_admin or request.user.is_staff or request.user == c.department.lead %}
-        <td class="text-nowrap">
-       {% if c.owner == request.user and request.user == c.department.lead and c.status in 'PENDING,ASSIGNED' %}
-<button class="btn btn-sm btn-outline-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#assignModal{{ c.id }}">
-  Assign Team Member
-</button>
-{% endif %}
+<table class="table table-bordered table-hover align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Requester</th>
+      <th>Department</th>
+      <th>Location</th>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Lead (Owner)</th>
+      <th>Assigned To</th>
+      <th>Created On</th>
+      <th>SLA</th>
+      <th>Due Date</th>
+      {% if is_admin or request.user.is_staff or request.user|yesno %}<th>Action</th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+  {% for c in complaints %}
+    <tr>
+      <td>{{ c.user.username }}</td>
+      <td>{{ c.department.name|default:"-" }}</td>
+      <td>{{ c.location }}</td>
+      <td>{{ c.title }}</td>
+      <td>{{ c.description }}</td>
+      <td>
+        <span class="badge
+          {% if c.status == 'PENDING' %}bg-danger
+          {% elif c.status == 'ASSIGNED' %}bg-primary
+          {% elif c.status == 'ACCEPTED' %}bg-success
+          {% elif c.status == 'IN_PROGRESS' %}bg-warning text-dark
+          {% elif c.status == 'COMPLETED' %}bg-info text-dark
+          {% elif c.status == 'ESCALATED' %}bg-dark
+          {% elif c.status in 'REJECTED,CLOSED' %}bg-secondary
+          {% endif %}">{{ c.status }}</span>
+      </td>
+      <td>{{ c.owner.username|default:"-" }}</td>
+      <td>{{ c.assigned_to.username|default:"-" }}</td>
+      <td>{{ c.created_on|date:"d-M-Y H:i A" }}</td>
+      <td>
+        {% if c.sla_start %}
+            {% if c.sla_end %}
+                {{ c.sla_start|timesince:c.sla_end }}
+            {% else %}
+                {{ c.sla_start|timesince }} elapsed
+            {% endif %}
+        {% else %}-{% endif %}
+      </td>
+      <td>{{ c.due_date|date:"d-M-Y H:i A"|default:"-" }}</td>
 
+      {% if is_admin or request.user.is_staff or request.user == c.department.lead or request.user == c.assigned_to %}
+      <td class="text-nowrap">
 
-          {% if c.status == 'ASSIGNED' and request.user == c.owner %}
-            <a href="{% url 'accept_complaint' c.id %}" class="btn btn-sm btn-outline-success">Accept</a>
-          {% endif %}
-          {% if c.status == 'ACCEPTED' and request.user == c.owner %}
-            <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#completeModal{{ c.id }}">Complete</button>
-          {% endif %}
-        </td>
+        {% if request.user == c.department.lead and c.status in 'PENDING,ASSIGNED' %}
+          <button class="btn btn-sm btn-outline-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#assignModal{{ c.id }}">
+            Assign Team Member
+          </button>
         {% endif %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+        {% if c.status == 'ASSIGNED' and c.assigned_to and request.user.id == c.assigned_to.id %}
+          <a href="{% url 'accept_complaint' c.id %}" class="btn btn-sm btn-outline-success">Accept</a>
+        {% endif %}
+
+        {% if c.status == 'ACCEPTED' and c.assigned_to and request.user.id == c.assigned_to.id %}
+          <button class="btn btn-sm btn-outline-info"
+                  data-bs-toggle="modal"
+                  data-bs-target="#completeModal{{ c.id }}">
+            Complete
+          </button>
+        {% endif %}
+
+      </td>
+      {% endif %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
 </div>
 
 <!-- Assign Modals -->
@@ -134,7 +143,7 @@
         <div class="modal-body">
           <select name="team_member_id" class="form-control" required>
             <option value="">-- Select Team Member --</option>
-            {% for u in team_members %}
+            {% for u in users %}
               <option value="{{ u.id }}">{{ u.username }}</option>
             {% endfor %}
           </select>
@@ -148,9 +157,9 @@
 </div>
 {% endfor %}
 
-<!-- Complete Complaint Modals -->
+<!-- Complete Modals -->
 {% for c in complaints %}
-  {% if c.status == 'ACCEPTED' and request.user == c.owner %}
+  {% if c.status == 'ACCEPTED' and request.user == c.assigned_to %}
   <div class="modal fade" id="completeModal{{ c.id }}" tabindex="-1">
     <div class="modal-dialog">
       <form method="POST" action="{% url 'complete_complaint' c.id %}" enctype="multipart/form-data">
@@ -161,10 +170,8 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <div class="mb-2">
-              <label for="picture{{ c.id }}" class="form-label">Upload Picture</label>
-              <input type="file" name="picture" class="form-control" id="picture{{ c.id }}" required>
-            </div>
+            <label for="picture{{ c.id }}" class="form-label">Upload Picture</label>
+            <input type="file" name="picture" class="form-control mb-2" id="picture{{ c.id }}" required>
             <p><strong>Location:</strong> {{ c.location }}</p>
             <p><strong>Description:</strong> {{ c.description }}</p>
           </div>
@@ -178,8 +185,6 @@
   {% endif %}
 {% endfor %}
 
-
-
 <!-- Add Complaint Modal -->
 <div class="modal fade" id="addComplaintModal" tabindex="-1">
   <div class="modal-dialog">
@@ -192,14 +197,14 @@
         </div>
         <div class="modal-body">
           {% if request.user.is_staff or is_admin %}
-          <select name="user_id" class="form-control mb-2" required>
-            <option value="">-- Select User --</option>
-            {% for u in users %}
-              <option value="{{ u.id }}">{{ u.username }}</option>
-            {% endfor %}
-          </select>
+            <select name="user_id" class="form-control mb-2" required>
+              <option value="">-- Select User --</option>
+              {% for u in users %}
+                <option value="{{ u.id }}">{{ u.username }}</option>
+              {% endfor %}
+            </select>
           {% else %}
-          <input type="hidden" name="user_id" value="{{ request.user.id }}">
+            <input type="hidden" name="user_id" value="{{ request.user.id }}">
           {% endif %}
           <select name="department_id" class="form-control mb-2" required>
             <option value="">-- Select Department --</option>
@@ -218,5 +223,50 @@
     </form>
   </div>
 </div>
+
+<script>
+function updateNotifications() {
+    fetch("{% url 'get_notifications' %}")
+    .then(response => response.json())
+    .then(data => {
+        const badge = document.getElementById("notifBadge");
+        const menu = document.getElementById("notifMenu");
+
+        // Update badge
+        if(data.unread_count > 0){
+            badge.textContent = data.unread_count;
+        } else {
+            badge.textContent = '';
+        }
+
+        // Update dropdown
+        let html = '';
+        if(data.notifications.length > 0){
+            data.notifications.forEach(n => {
+                html += `<li class="px-3 py-2 ${n.is_read ? '' : 'fw-bold'}">
+                            ${n.message}<br>
+                            <small class="text-muted">${n.created_on}</small>
+                         </li>`;
+            });
+        } else {
+            html = '<li class="px-3 py-2">No notifications</li>';
+        }
+        menu.innerHTML = html;
+    })
+    .catch(err => console.error("Notification fetch error:", err));
+}
+
+// Update every 10 seconds
+setInterval(updateNotifications, 10000);
+
+// Mark as read when dropdown clicked
+document.getElementById("notifDropdown").addEventListener("click", () => {
+    fetch("{% url 'mark_notifications_read' %}")
+    .then(updateNotifications);
+});
+
+// Initial load
+updateNotifications();
+</script>
 
 {% endblock %}

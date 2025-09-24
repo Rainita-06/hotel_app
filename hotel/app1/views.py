@@ -359,32 +359,224 @@ from django.db.models import Q
 from .models import Complaint, Department, User
 from .tasks import send_notification  # Celery task
 
-STATUSES = [
-    "PENDING", "ASSIGNED", "ACCEPTED", "IN_PROGRESS",
-    "COMPLETED", "ESCALATED", "REJECTED", "CLOSED"
-]
+# STATUSES = [
+#     "PENDING", "ASSIGNED", "ACCEPTED", "IN_PROGRESS",
+#     "COMPLETED", "ESCALATED", "REJECTED", "CLOSED"
+# ]
+
+# def is_admin(user):
+#     return user.is_superuser or user.is_staff
+
+# @login_required
+# def complaint_list(request):
+#     status_filter = request.GET.get("status", "All")
+#     unread_count = request.user.notification_set.filter(is_read=False).count()
+#     notifications = request.user.notification_set.all()[:5]
+
+#     if is_admin(request.user):
+#         # Admin: see all complaints
+#         complaints = Complaint.objects.all().order_by("-created_on")
+#     else:
+#         # Normal users, department leads, and assigned members
+#         complaints = Complaint.objects.filter(
+#             Q(user=request.user) |
+#             Q(owner=request.user) |
+#             Q(assigned_to=request.user) |
+#             Q(department__lead=request.user)
+#         ).order_by("-created_on")
+
+#     if status_filter and status_filter != "All":
+#         complaints = complaints.filter(status=status_filter)
+
+#     context = {
+#         "complaints": complaints,
+#         "statuses": STATUSES,
+#         "status_filter": status_filter,
+#         "departments": Department.objects.all(),
+#         "users": User.objects.all(),
+#         "notifications": notifications,
+#         "unread_count": unread_count,
+#         "team_members": User.objects.filter(is_staff=True),
+#         "is_admin": is_admin(request.user),
+#     }
+#     return render(request, "complaints.html", context)
+
+# @login_required
+# def add_complaint(request):
+#     if request.method == "POST":
+#         user_id = request.POST.get("user_id")
+#         department_id = request.POST.get("department_id")
+#         location = request.POST.get("location")
+#         title = request.POST.get("title")
+#         description = request.POST.get("description")
+
+#         if not all([user_id, department_id, location, title, description]):
+#             messages.error(request, "All fields are required!")
+#             return redirect("complaint_list")
+
+#         user = get_object_or_404(User, id=user_id)
+#         department = get_object_or_404(Department, department_id=department_id)
+
+#         lead = department.lead
+#         status = "ASSIGNED" if lead else "PENDING"
+
+#         complaint = Complaint.objects.create(
+#             user=user,
+#             department=department,
+#             owner=lead,  # Lead becomes initial owner
+#             location=location,
+#             title=title,
+#             description=description,
+#             status=status,
+#             created_on=timezone.now()
+#         )
+
+#         if lead:
+#             send_notification.delay(
+#                 lead.id,
+#                 f"New complaint #{complaint.id} automatically assigned to you as Department Lead."
+#             )
+
+#         messages.success(
+#             request,
+#             f"Complaint '{title}' created and assigned to Department Lead." if lead
+#             else f"Complaint '{title}' created (no lead assigned)."
+#         )
+#         return redirect("complaint_list")
+
+#     messages.error(request, "Invalid request method.")
+#     return redirect("complaint_list")
+# @login_required
+# def assign_complaint(request, complaint_id):
+#     complaint = get_object_or_404(Complaint, id=complaint_id)
+
+#     # Only department lead can assign
+#     if request.user != complaint.department.lead:
+#         messages.error(request, "Only the Department Lead can assign team members.")
+#         return redirect("complaint_list")
+
+#     if request.method == "POST":
+#         team_member_id = request.POST.get("team_member_id")
+#         if not team_member_id:
+#             messages.error(request, "Select a team member.")
+#             return redirect("complaint_list")
+
+#         member = get_object_or_404(User, id=team_member_id)
+
+#         # Assign complaint to team member
+#         complaint.assigned_to = member   # <-- Correct column
+#         complaint.status = "ASSIGNED"
+#         complaint.save()
+
+#         # Notify the assigned member
+#         send_notification.delay(
+#             member.id,
+#             f"You have been assigned complaint #{complaint.id} by the Department Lead."
+#         )
+
+#         messages.success(request, f"Complaint #{complaint.id} assigned to {member.username}.")
+#         return redirect("complaint_list")
+
+#     messages.error(request, "Invalid request method.")
+#     return redirect("complaint_list")
+
+
+
+
+
+# @login_required
+# def accept_complaint(request, complaint_id):
+#     complaint = get_object_or_404(Complaint, id=complaint_id)
+
+#     # Only the assigned member can accept
+#     if request.user != complaint.assigned_to:
+#         messages.error(request, "You are not authorized to accept this complaint.")
+#         return redirect('complaint_list')
+
+#     complaint.status = 'ACCEPTED'
+#     complaint.sla_start = timezone.now()
+#     complaint.save()
+
+#     # Notify department lead
+#     if complaint.department and complaint.department.lead:
+#         send_notification.delay(
+#             complaint.department.lead.id,
+#             f"Team member {request.user.username} has accepted complaint #{complaint.id}. SLA started."
+#         )
+
+#     messages.success(request, f"Complaint #{complaint.id} accepted by {request.user.username}.")
+#     return redirect('complaint_list')
+
+
+
+# @login_required
+# def complete_complaint(request, complaint_id):
+#     complaint = get_object_or_404(Complaint, id=complaint_id)
+
+#     if request.user != complaint.assigned_to:
+#         messages.error(request, "You are not authorized to complete this complaint.")
+#         return redirect('complaint_list')
+
+#     if request.method == "POST":
+#         picture = request.FILES.get("picture")
+#         complaint.status = "COMPLETED"
+#         complaint.completed_on = timezone.now()
+#         if picture:
+#             complaint.picture = picture
+#         complaint.save()
+
+#         send_notification.delay(
+#             complaint.user.id,
+#             f"Your complaint #{complaint.id} has been completed by {request.user.username}."
+#         )
+
+#         messages.success(request, f"Complaint #{complaint.id} completed successfully.")
+#         return redirect('complaint_list')
+
+#     return redirect('complaint_list')
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Q
+from django.utils import timezone
+from django.http import JsonResponse
+from .models import Complaint, Department, Notification, User
+from .tasks import send_notification
+
+STATUSES = ["PENDING", "ASSIGNED", "ACCEPTED", "IN_PROGRESS", "COMPLETED", "ESCALATED", "REJECTED", "CLOSED"]
 
 def is_admin(user):
     return user.is_superuser or user.is_staff
 
+# ------------------- Complaint List -------------------
 @login_required
 def complaint_list(request):
     status_filter = request.GET.get("status", "All")
     unread_count = request.user.notification_set.filter(is_read=False).count()
-    notifications = request.user.notification_set.all()[:5]
+    notifications = request.user.notification_set.order_by("-created_on")[:5]
+    complaints = Complaint.objects.all()
+    now = timezone.now()
 
+    for c in complaints:
+        if c.sla_start and c.due_date:
+            total_seconds = (c.due_date - c.sla_start).total_seconds()
+            elapsed_seconds = (now - c.sla_start).total_seconds()
+            # Ensure progress is between 0% and 100%
+            c.progress = max(0, min(100, (elapsed_seconds / total_seconds) * 100))
+        else:
+            c.progress = None
     if is_admin(request.user):
-        # Admin: see all complaints
         complaints = Complaint.objects.all().order_by("-created_on")
     else:
-        # Normal users and department leads
         complaints = Complaint.objects.filter(
-            Q(user=request.user) | Q(owner=request.user) | Q(department__lead=request.user)
+            Q(user=request.user) |
+            Q(owner=request.user) |
+            Q(assigned_to=request.user) |
+            Q(department__lead=request.user)
         ).order_by("-created_on")
 
     if status_filter and status_filter != "All":
         complaints = complaints.filter(status=status_filter)
-    
 
     context = {
         "complaints": complaints,
@@ -396,10 +588,11 @@ def complaint_list(request):
         "unread_count": unread_count,
         "team_members": User.objects.filter(is_staff=True),
         "is_admin": is_admin(request.user),
+        "now":now,
     }
     return render(request, "complaints.html", context)
 
-
+# ------------------- Add Complaint -------------------
 @login_required
 def add_complaint(request):
     if request.method == "POST":
@@ -422,7 +615,7 @@ def add_complaint(request):
         complaint = Complaint.objects.create(
             user=user,
             department=department,
-            owner=lead,  # Lead becomes initial owner
+            owner=lead,
             location=location,
             title=title,
             description=description,
@@ -446,12 +639,11 @@ def add_complaint(request):
     messages.error(request, "Invalid request method.")
     return redirect("complaint_list")
 
-
+# ------------------- Assign Complaint -------------------
 @login_required
 def assign_complaint(request, complaint_id):
     complaint = get_object_or_404(Complaint, id=complaint_id)
 
-    # Only department lead can assign
     if request.user != complaint.department.lead:
         messages.error(request, "Only the Department Lead can assign team members.")
         return redirect("complaint_list")
@@ -463,7 +655,8 @@ def assign_complaint(request, complaint_id):
             return redirect("complaint_list")
 
         member = get_object_or_404(User, id=team_member_id)
-        complaint.owner = member
+
+        complaint.assigned_to = member
         complaint.status = "ASSIGNED"
         complaint.save()
 
@@ -471,18 +664,19 @@ def assign_complaint(request, complaint_id):
             member.id,
             f"You have been assigned complaint #{complaint.id} by the Department Lead."
         )
+
         messages.success(request, f"Complaint #{complaint.id} assigned to {member.username}.")
         return redirect("complaint_list")
 
     messages.error(request, "Invalid request method.")
     return redirect("complaint_list")
 
-
+# ------------------- Accept Complaint -------------------
 @login_required
 def accept_complaint(request, complaint_id):
     complaint = get_object_or_404(Complaint, id=complaint_id)
 
-    if request.user != complaint.owner:
+    if request.user != complaint.assigned_to:
         messages.error(request, "You are not authorized to accept this complaint.")
         return redirect('complaint_list')
 
@@ -490,22 +684,21 @@ def accept_complaint(request, complaint_id):
     complaint.sla_start = timezone.now()
     complaint.save()
 
-    # Notify department lead
     if complaint.department and complaint.department.lead:
         send_notification.delay(
             complaint.department.lead.id,
             f"Team member {request.user.username} has accepted complaint #{complaint.id}. SLA started."
         )
 
-    messages.success(request, f"Complaint #{complaint.id} accepted by team member.")
+    messages.success(request, f"Complaint #{complaint.id} accepted by {request.user.username}.")
     return redirect('complaint_list')
 
-
+# ------------------- Complete Complaint -------------------
 @login_required
 def complete_complaint(request, complaint_id):
     complaint = get_object_or_404(Complaint, id=complaint_id)
 
-    if request.user != complaint.owner:
+    if request.user != complaint.assigned_to:
         messages.error(request, "You are not authorized to complete this complaint.")
         return redirect('complaint_list')
 
@@ -513,6 +706,7 @@ def complete_complaint(request, complaint_id):
         picture = request.FILES.get("picture")
         complaint.status = "COMPLETED"
         complaint.completed_on = timezone.now()
+        complaint.sla_end = timezone.now()  # Stop SLA timer
         if picture:
             complaint.picture = picture
         complaint.save()
@@ -525,8 +719,30 @@ def complete_complaint(request, complaint_id):
         messages.success(request, f"Complaint #{complaint.id} completed successfully.")
         return redirect('complaint_list')
 
-    messages.error(request, "Invalid request method.")
     return redirect('complaint_list')
+
+# ------------------- Notification API -------------------
+@login_required
+def get_notifications(request):
+    notifications = request.user.notification_set.order_by("-created_on")[:5]
+    unread_count = request.user.notification_set.filter(is_read=False).count()
+
+    notif_list = []
+    for n in notifications:
+        notif_list.append({
+            "id": n.id,
+            "message": n.message[:50],
+            "created_on": n.created_on.strftime("%d-%b-%Y %H:%M"),
+            "is_read": n.is_read
+        })
+
+    return JsonResponse({"notifications": notif_list, "unread_count": unread_count})
+
+@login_required
+def mark_notifications_read(request):
+    request.user.notification_set.filter(is_read=False).update(is_read=True)
+    return JsonResponse({"status": "ok"})
+
 
 
 # ------------------ Update Complaint Status (Admin) ------------------
@@ -583,6 +799,32 @@ def delete_complaint(request, complaint_id):
     complaint.delete()
     messages.success(request, "Complaint deleted successfully.")
     return redirect("complaint_list")
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Notification
+
+@login_required
+def get_notifications(request):
+    notifications = request.user.notification_set.all()[:5]
+    unread_count = request.user.notification_set.filter(is_read=False).count()
+    
+    notif_list = []
+    for n in notifications:
+        notif_list.append({
+            "id": n.id,
+            "message": n.message[:50],
+            "created_on": n.created_on.strftime("%d-%b-%Y %H:%M"),
+            "is_read": n.is_read
+        })
+
+    return JsonResponse({"notifications": notif_list, "unread_count": unread_count})
+
+
+@login_required
+def mark_notifications_read(request):
+    request.user.notification_set.filter(is_read=False).update(is_read=True)
+    return JsonResponse({"status": "ok"})
+
 
 
 from django.shortcuts import render, redirect, get_object_or_404

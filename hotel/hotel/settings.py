@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     # DRF
     'rest_framework',
     'rest_framework.authtoken',
-    'django_celery_beat'
+    'django_celery_beat',
+    
 ]
 
 REST_FRAMEWORK = {
@@ -61,6 +62,15 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+# settings.py (Celery beat schedule)
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'check-sla-every-5-minutes': {
+        'task': 'complaints.tasks.check_sla',
+        'schedule': crontab(minute='*/5'),  # every 5 minutes
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
