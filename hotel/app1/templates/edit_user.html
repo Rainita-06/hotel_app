@@ -2,35 +2,63 @@
 {% block title %}Edit User{% endblock %}
 
 {% block content %}
-<h2>Edit User - {{ user.username }}</h2>
+<h3 class="mb-3">Edit User – {{ user.username }}</h3>
 
-<form method="POST">
-  {% csrf_token %}
-  <input type="text" name="username" class="form-control mb-2" value="{{ user.username }}" required>
-  <input type="email" name="email" class="form-control mb-2" value="{{ user.email }}" required>
-  <input type="text" name="phone" class="form-control mb-2" value="{{ user.profile.phone }}">
-  <input type="text" name="title" class="form-control mb-2" value="{{ user.profile.title }}">
-  
-  <select name="department_id" class="form-control mb-2" required>
-    {% for d in departments %}
-     <option value="{{ d.department_id }}" {% if d.department_id == user.department.department_id %}selected{% endif %}>
-    {{ d.name }}
-</option>
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="POST">
+      {% csrf_token %}
 
-    {% endfor %}
-  </select>
+      <div class="mb-3">
+        <label class="form-label">Full Name</label>
+        <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+      </div>
 
-  <select name="role" class="form-control mb-2" required>
-    <option value="employee" {% if user.role == "employee" %}selected{% endif %}>Employee</option>
-    <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
-  </select>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+      </div>
 
-  <div class="form-check mb-2">
-    <input class="form-check-input" type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}>
-    <label class="form-check-label">Active</label>
+      <div class="mb-3">
+        <label class="form-label">Phone</label>
+        <input type="text" name="phone" class="form-control" value="{{ user.profile.phone }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input type="text" name="title" class="form-control" value="{{ user.profile.title }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Department</label>
+        <select name="department_id" class="form-control" required>
+          {% for d in departments %}
+            <option value="{{ d.department_id }}" {% if user.profile.department and d.department_id == user.profile.department.department_id %}selected{% endif %}>
+              {{ d.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Role</label>
+        <select name="role" class="form-control" required>
+          <option value="staff" {% if user.profile.role == "staff" %}selected{% endif %}>Staff</option>
+          <option value="manager" {% if user.profile.role == "manager" %}selected{% endif %}>Manager</option>
+          <option value="admin" {% if user.profile.role == "admin" %}selected{% endif %}>Admin</option>
+        </select>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}>
+        <label class="form-check-label">Active</label>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{% url 'master_user' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
   </div>
-
-  <button type="submit" class="btn btn-primary">Update</button>
-  <a href="{% url 'master_user' %}" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 {% endblock %}

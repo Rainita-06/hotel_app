@@ -3,6 +3,8 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+
+from .tasks import send_notification
 from .decorators import group_required
 
 # ---------- Auth ----------
@@ -115,36 +117,88 @@ def room_detail(request, voucher_id):
 
     return render(request, "room_detail.html", {"voucher": voucher, "message": message})
 
+# from django.shortcuts import render, redirect, get_object_or_404
+# from .models import Department
+# from django.contrib import messages
+
+# def department_list(request):
+#     departments = Department.objects.all()
+#     return render(request, "departments.html", {"departments": departments})
+
+# def add_department(request):
+#     if request.method == "POST":
+#         name = request.POST.get("name")
+#         description = request.POST.get('description', '') 
+#         if name:
+#             Department.objects.create(name=name, description=description)
+#         messages.success(request,f"Department {name} added successfully!")
+#         return redirect("department_list")
+
+# def edit_department(request, pk):
+#     department = get_object_or_404(Department, pk=pk)
+#     if request.method == "POST":
+#         name = request.POST.get("name")
+#         description = request.POST.get('description', '')
+#         if name:
+#             department.name = name
+#             department.description = description
+#             department.save()
+#         messages.success(request,f"Department {department.name} updated successfully!")
+#         return redirect("department_list")
+#     # ❌ Remove the render line (no separate template)
+#     return redirect("department_list")
+
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Department
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.contrib.auth.decorators import login_required
+from .models import Department, Complaint
+from django.contrib.auth.models import User
+
+# ===== Departments =====
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.models import User
+from .models import Department
 
 def department_list(request):
-    departments = Department.objects.all()
-    return render(request, "departments.html", {"departments": departments})
+    departments = Department.objects.all().select_related("lead")
+    users = User.objects.all().order_by("username")          # for dropdown
+    return render(request, "departments.html", {
+        "departments": departments,
+        "users": users,
+    })
 
 def add_department(request):
     if request.method == "POST":
         name = request.POST.get("name")
-        description = request.POST.get('description', '') 
+        description = request.POST.get("description", "")
+        lead_id = request.POST.get("lead")
         if name:
-            Department.objects.create(name=name, description=description)
-        messages.success(request,f"Department {name} added successfully!")
+            Department.objects.create(
+                name=name,
+                description=description,
+                lead_id=lead_id if lead_id else None,
+            )
+            messages.success(request, f"Department {name} added successfully!")
         return redirect("department_list")
 
 def edit_department(request, pk):
     department = get_object_or_404(Department, pk=pk)
     if request.method == "POST":
         name = request.POST.get("name")
-        description = request.POST.get('description', '')
+        description = request.POST.get("description", "")
+        lead_id = request.POST.get("lead")
         if name:
             department.name = name
             department.description = description
+            department.lead_id = lead_id if lead_id else None
             department.save()
-        messages.success(request,f"Department {department.name} updated successfully!")
+            messages.success(request,
+                f"Department {department.name} updated successfully!")
         return redirect("department_list")
-    # ❌ Remove the render line (no separate template)
     return redirect("department_list")
+
 
 
 def delete_department(request, pk):
@@ -171,97 +225,331 @@ from .models import Complaint
 
 
 # ---------- Complaint List ----------
+# @login_required
+# def complaint_list(request):
+#     statuses = ["Pending", "Assigned", "Accepted", "In Progress", "Completed", "Escalated", "Closed", "All"]
+#     status_filter = request.GET.get("status", "Pending")
+
+#     # Check if the user is admin/staff
+#     is_admin = request.user.is_staff or request.user.is_superuser
+
+#     # Complaints queryset
+#     if is_admin:
+#         complaints = Complaint.objects.all()
+#         users = User.objects.all()  # Admin can see all users
+#     else:
+#         complaints = Complaint.objects.filter(user=request.user)
+#         users = [request.user]  # Normal users see only themselves
+
+#     # Apply status filter
+#     if status_filter == "All":
+#         complaints = complaints
+#     elif status_filter == "Closed":
+#         complaints = complaints.filter(status="CLOSED")
+#     elif status_filter == "On Hold":
+#         complaints = complaints.filter(status="ON_HOLD")
+#     else:  # Pending = NEW or ACCEPTED
+#         complaints = complaints.exclude(status="CLOSED")
+
+#     return render(request, "complaints.html", {
+#         "complaints": complaints,
+#         "users": users,
+#         "statuses": statuses,
+#         "status_filter": status_filter,
+#         "is_admin": is_admin
+#     })
+
+
+# @login_required
+# def add_complaint(request):
+#     if request.method == "POST":
+#         department_id = request.POST.get("department_id")
+#         department = Department.objects.get(id=department_id)
+#         user = request.user
+
+#         complaint = Complaint.objects.create(
+#             user=user,
+#             department=department,
+#             title=request.POST["title"],
+#             description=request.POST["description"],
+#             location=request.POST["location"],
+#         )
+
+#         # Notify department lead
+#         leads = User.objects.filter(is_staff=True, department=department)
+#         for lead in leads:
+#             send_notification.delay(lead.id, f"New complaint {complaint.id} in your department: {complaint.location}")
+
+#         messages.success(request, "Complaint raised successfully.")
+#     return redirect("complaint_list")
+# @login_required
+# def assign_complaint(request, complaint_id):
+#     complaint = get_object_or_404(Complaint, id=complaint_id)
+#     if request.method == "POST":
+#         team_member_id = request.POST.get("team_member_id")
+#         member = User.objects.get(id=team_member_id)
+#         complaint.owner = member
+#         complaint.status = "ASSIGNED"
+#         complaint.save()
+
+#         # Notify team member
+#         send_notification.delay(member.id, f"You've been assigned complaint {complaint.id}. Please accept.")
+#     return redirect("complaint_list")
+# @login_required
+# def accept_complaint(request, complaint_id):
+#     complaint = get_object_or_404(Complaint, id=complaint_id)
+#     if request.user != complaint.owner:
+#         messages.error(request, "Not authorized")
+#         return redirect("complaint_list")
+
+#     complaint.status = "ACCEPTED"
+#     complaint.sla_start = timezone.now()
+#     complaint.save()
+
+#     # Notify lead
+#     send_notification.delay(complaint.department.user.id, f"{request.user.username} accepted complaint {complaint.id}")
+#     return redirect("complaint_list")
+
+# @login_required
+# def complete_complaint(request, complaint_id):
+#     complaint = get_object_or_404(Complaint, id=complaint_id)
+#     if request.user != complaint.owner:
+#         messages.error(request, "Not authorized")
+#         return redirect("complaint_list")
+
+#     complaint.status = "COMPLETED"
+#     complaint.sla_end = timezone.now()
+#     complaint.save()
+
+#     # Notify lead and front desk
+#     leads = User.objects.filter(is_staff=True, department=complaint.department)
+#     for lead in leads:
+#         send_notification.delay(lead.id, f"Complaint {complaint.id} completed by {request.user.username}")
+#     send_notification.delay(complaint.user.id, f"Your complaint {complaint.id} has been resolved")
+#     return redirect("complaint_list")
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.utils import timezone
+from .models import Complaint, Department
+from django.contrib.auth.models import User
+
+# app1/views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from .models import Complaint, Department, User
+from .tasks import send_notification   # your celery task or helper
+# complaints/views.py
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.utils import timezone
+from django.contrib.auth.models import User
+from .models import Complaint, Department
+from .tasks import send_notification   # your Celery task
+from app1 import models
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.utils import timezone
+from django.db.models import Q
+from .models import Complaint, Department, User
+from .tasks import send_notification  # Celery task
+
+STATUSES = [
+    "PENDING", "ASSIGNED", "ACCEPTED", "IN_PROGRESS",
+    "COMPLETED", "ESCALATED", "REJECTED", "CLOSED"
+]
+
+def is_admin(user):
+    return user.is_superuser or user.is_staff
+
 @login_required
 def complaint_list(request):
-    status_filter = request.GET.get("status", "Pending")
+    status_filter = request.GET.get("status", "All")
+    unread_count = request.user.notification_set.filter(is_read=False).count()
+    notifications = request.user.notification_set.all()[:5]
 
-    # Check if the user is admin/staff
-    is_admin = request.user.is_staff or request.user.is_superuser
-
-    # Complaints queryset
-    if is_admin:
-        complaints = Complaint.objects.all()
-        users = User.objects.all()  # Admin can see all users
+    if is_admin(request.user):
+        # Admin: see all complaints
+        complaints = Complaint.objects.all().order_by("-created_on")
     else:
-        complaints = Complaint.objects.filter(user=request.user)
-        users = [request.user]  # Normal users see only themselves
+        # Normal users and department leads
+        complaints = Complaint.objects.filter(
+            Q(user=request.user) | Q(owner=request.user) | Q(department__lead=request.user)
+        ).order_by("-created_on")
 
-    # Apply status filter
-    if status_filter == "All":
-        complaints = complaints
-    elif status_filter == "Closed":
-        complaints = complaints.filter(status="CLOSED")
-    elif status_filter == "On Hold":
-        complaints = complaints.filter(status="ON_HOLD")
-    else:  # Pending = NEW or ACCEPTED
-        complaints = complaints.exclude(status="CLOSED")
+    if status_filter and status_filter != "All":
+        complaints = complaints.filter(status=status_filter)
+    
 
-    return render(request, "complaints.html", {
+    context = {
         "complaints": complaints,
-        "users": users,
+        "statuses": STATUSES,
         "status_filter": status_filter,
-        "is_admin": is_admin
-    })
+        "departments": Department.objects.all(),
+        "users": User.objects.all(),
+        "notifications": notifications,
+        "unread_count": unread_count,
+        "team_members": User.objects.filter(is_staff=True),
+        "is_admin": is_admin(request.user),
+    }
+    return render(request, "complaints.html", context)
 
 
-# ---------- Add Complaint ----------
 @login_required
 def add_complaint(request):
     if request.method == "POST":
         user_id = request.POST.get("user_id")
-
-        try:
-            if request.user.is_staff or request.user.is_superuser:
-                custom_user = User.objects.get(id=user_id)  # Admin can assign to anyone
-            else:
-                # Force normal user to themselves (ignore dropdown tampering)
-                custom_user = request.user
-        except User.DoesNotExist:
-            messages.error(request, "User not found.")
-            return redirect("complaint_list")
-
+        department_id = request.POST.get("department_id")
         location = request.POST.get("location")
         title = request.POST.get("title")
         description = request.POST.get("description")
 
-        Complaint.objects.create(
-            user=custom_user,
+        if not all([user_id, department_id, location, title, description]):
+            messages.error(request, "All fields are required!")
+            return redirect("complaint_list")
+
+        user = get_object_or_404(User, id=user_id)
+        department = get_object_or_404(Department, department_id=department_id)
+
+        lead = department.lead
+        status = "ASSIGNED" if lead else "PENDING"
+
+        complaint = Complaint.objects.create(
+            user=user,
+            department=department,
+            owner=lead,  # Lead becomes initial owner
             location=location,
             title=title,
             description=description,
-            status="NEW"
+            status=status,
+            created_on=timezone.now()
         )
 
-        messages.success(request, "Complaint added successfully.")
+        if lead:
+            send_notification.delay(
+                lead.id,
+                f"New complaint #{complaint.id} automatically assigned to you as Department Lead."
+            )
+
+        messages.success(
+            request,
+            f"Complaint '{title}' created and assigned to Department Lead." if lead
+            else f"Complaint '{title}' created (no lead assigned)."
+        )
+        return redirect("complaint_list")
+
+    messages.error(request, "Invalid request method.")
     return redirect("complaint_list")
 
 
-# ---------- Update Complaint Status (Admin only) ----------
+@login_required
+def assign_complaint(request, complaint_id):
+    complaint = get_object_or_404(Complaint, id=complaint_id)
+
+    # Only department lead can assign
+    if request.user != complaint.department.lead:
+        messages.error(request, "Only the Department Lead can assign team members.")
+        return redirect("complaint_list")
+
+    if request.method == "POST":
+        team_member_id = request.POST.get("team_member_id")
+        if not team_member_id:
+            messages.error(request, "Select a team member.")
+            return redirect("complaint_list")
+
+        member = get_object_or_404(User, id=team_member_id)
+        complaint.owner = member
+        complaint.status = "ASSIGNED"
+        complaint.save()
+
+        send_notification.delay(
+            member.id,
+            f"You have been assigned complaint #{complaint.id} by the Department Lead."
+        )
+        messages.success(request, f"Complaint #{complaint.id} assigned to {member.username}.")
+        return redirect("complaint_list")
+
+    messages.error(request, "Invalid request method.")
+    return redirect("complaint_list")
+
+
+@login_required
+def accept_complaint(request, complaint_id):
+    complaint = get_object_or_404(Complaint, id=complaint_id)
+
+    if request.user != complaint.owner:
+        messages.error(request, "You are not authorized to accept this complaint.")
+        return redirect('complaint_list')
+
+    complaint.status = 'ACCEPTED'
+    complaint.sla_start = timezone.now()
+    complaint.save()
+
+    # Notify department lead
+    if complaint.department and complaint.department.lead:
+        send_notification.delay(
+            complaint.department.lead.id,
+            f"Team member {request.user.username} has accepted complaint #{complaint.id}. SLA started."
+        )
+
+    messages.success(request, f"Complaint #{complaint.id} accepted by team member.")
+    return redirect('complaint_list')
+
+
+@login_required
+def complete_complaint(request, complaint_id):
+    complaint = get_object_or_404(Complaint, id=complaint_id)
+
+    if request.user != complaint.owner:
+        messages.error(request, "You are not authorized to complete this complaint.")
+        return redirect('complaint_list')
+
+    if request.method == "POST":
+        picture = request.FILES.get("picture")
+        complaint.status = "COMPLETED"
+        complaint.completed_on = timezone.now()
+        if picture:
+            complaint.picture = picture
+        complaint.save()
+
+        send_notification.delay(
+            complaint.user.id,
+            f"Your complaint #{complaint.id} has been completed by {request.user.username}."
+        )
+
+        messages.success(request, f"Complaint #{complaint.id} completed successfully.")
+        return redirect('complaint_list')
+
+    messages.error(request, "Invalid request method.")
+    return redirect('complaint_list')
+
+
+# ------------------ Update Complaint Status (Admin) ------------------
 @login_required
 def update_complaint_status(request, complaint_id, action):
-    is_admin = request.user.is_staff or request.user.is_superuser
-    if not is_admin:
+    if not is_admin(request.user):
         messages.error(request, "You do not have permission to perform this action.")
         return redirect("complaint_list")
 
     complaint = get_object_or_404(Complaint, id=complaint_id)
 
-    if action == "accept":
-        complaint.status = "ACCEPTED"
-        complaint.owner = request.user.username
-    elif action == "assign":
-        complaint.status = "ON_HOLD"
-    elif action == "close":
+    if action == "close":
         complaint.status = "CLOSED"
         complaint.due_date = timezone.now()
-
-    complaint.save()
-    messages.success(request, "Complaint updated successfully.")
+        complaint.save()
+        send_notification.delay(
+            complaint.user.id,
+            f"Complaint #{complaint.id} has been closed. SLA: {complaint.sla_start} - {complaint.due_date}"
+        )
+        messages.success(request, f"Complaint #{complaint.id} closed.")
+    else:
+        messages.error(request, "Invalid action.")
     return redirect("complaint_list")
-
-
-
-
 
 
 
@@ -361,33 +649,178 @@ def assign_users_group(request, group_id):
         messages.success(request, f'Users assigned to "{group.name}" successfully.')
     return redirect('user_groups')
 
+# from django.shortcuts import render, get_object_or_404, redirect
+# from django.contrib import messages
+# from .models import Users, Department
+# from django.utils import timezone
+# from django.contrib.auth.models import User
+
+# # Master user list
+# def master_user(request):
+#     users = User.objects.all()
+#     departments = Department.objects.all()
+#     return render(request, "master_user.html", {"users": users, "departments": departments})
+
+# from django.contrib.auth.models import User
+# # Add new user
+# def add_user(request):
+    
+#     if request.method == "POST":
+#         username = request.POST.get("username")
+#         email = request.POST.get("email")
+#         phone = request.POST.get("phone")
+#         title = request.POST.get("title")
+#         password=request.POST.get("password")
+#         department_id = request.POST.get("department_id")
+#         role = request.POST.get("role")
+#         is_active = True if request.POST.get("is_active") == "on" else False
+
+#         department = get_object_or_404(Department, department_id=department_id)
+#         user = User.objects.create_user(
+#             username=username,
+#             email=email,
+#             password=password,
+#             is_active=is_active
+#         )
+
+#         UserProfile.objects.create(
+#             user=user,
+#             phone=phone,
+#             title=title,
+#             department=department,
+            
+#             role=role,
+#             # is_active=is_active,
+#             # created_at=timezone.now(),
+#             # updated_at=timezone.now()
+#         )
+#         messages.success(request, f"User '{username}' updated successfully!")
+#         return redirect("master_user")
+
+
+# # Edit user
+# def edit_user(request, user_id):
+#     user = get_object_or_404(User, id=user_id)
+#     departments = Department.objects.all()
+
+#     if request.method == "POST":
+#         user.username = request.POST.get("username")
+#         user.email = request.POST.get("email")
+#         user.phone = request.POST.get("phone")
+#         user.title = request.POST.get("title")
+#         department_id = request.POST.get("department_id")
+#         user.department = get_object_or_404(Department, department_id=department_id)
+#         user.role = request.POST.get("role")
+#         user.is_active = True if request.POST.get("is_active") == "on" else False
+#         user.updated_at = timezone.now()
+#         user.save()
+#         messages.success( request,f"User '{user.username}' updated successfully!")
+#         return redirect("master_user")
+
+#     return render(request, "edit_user.html", {"user": user, "departments": departments})
+
+
+# # Copy user (duplicate entry)
+# def copy_user(request, user_id):
+#     user = get_object_or_404(User, user_id=user_id)
+#     user.pk = None  # remove primary key
+#     user.full_name = f"{user.full_name} (Copy)"
+#     user.email = f"copy_{user.email}"
+#     user.created_at = timezone.now()
+#     user.updated_at = timezone.now()
+#     user.save()
+#     messages.success(request, "User copied successfully.")
+#     return redirect("master_user")
+
+
+# # Delete user
+# def delete_user(request, user_id):
+#     # Get the user object
+#     user = get_object_or_404(User, id=user_id)
+
+#     # Optional: delete the linked UserProfile first
+#     try:
+#         profile = UserProfile.objects.get(user=user)
+#         profile.delete()
+#     except UserProfile.DoesNotExist:
+#         pass  # No profile to delete, continue
+
+#     # Delete the user
+#     user.delete()
+
+#     messages.success(request, f"User '{user.username}' deleted successfully!")
+#     return redirect("master_user")
+
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Users, Department
-from django.utils import timezone
 from django.contrib.auth.models import User
+from django.contrib import messages
+from django.utils import timezone
+from .models import UserProfile, Department
+
 
 # Master user list
-def master_user(request):
-    users = User.objects.all()
-    departments = Department.objects.all()
-    return render(request, "master_user.html", {"users": users, "departments": departments})
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.db.models import Q
 
-from django.contrib.auth.models import User
+def master_user(request):
+    users = User.objects.all().select_related("profile")
+    departments = Department.objects.all()
+
+    # Filters
+    search = request.GET.get("search", "").strip()
+    role_filter = request.GET.get("role", "")
+    dept_filter = request.GET.get("department", "")
+    status_filter = request.GET.get("status", "")
+
+    if search:
+        users = users.filter(
+            Q(username__icontains=search) |
+            Q(email__icontains=search) |
+            Q(profile__phone__icontains=search)
+        )
+
+    if role_filter and role_filter != "all":
+        users = users.filter(profile__role__iexact=role_filter)
+
+    if dept_filter:
+        users = users.filter(profile__department_id=dept_filter)
+
+    if status_filter == "active":
+        users = users.filter(is_active=True)
+    elif status_filter == "inactive":
+        users = users.filter(is_active=False)
+
+    # Pagination
+    page_number = request.GET.get("page", 1)
+    paginator = Paginator(users, 5)  # 5 users per page
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "master_user_new.html", {
+        "users": page_obj,
+        "departments": departments,
+        "role_filter": role_filter,
+        "dept_filter": dept_filter,
+        "status_filter": status_filter,
+        "paginator": paginator,
+        "page_number": int(page_number),
+    })
+
+
 # Add new user
 def add_user(request):
-    
     if request.method == "POST":
         username = request.POST.get("username")
         email = request.POST.get("email")
         phone = request.POST.get("phone")
         title = request.POST.get("title")
-        password=request.POST.get("password")
+        password = request.POST.get("password")
         department_id = request.POST.get("department_id")
         role = request.POST.get("role")
         is_active = True if request.POST.get("is_active") == "on" else False
 
         department = get_object_or_404(Department, department_id=department_id)
+
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -400,68 +833,76 @@ def add_user(request):
             phone=phone,
             title=title,
             department=department,
-            
             role=role,
-            # is_active=is_active,
-            # created_at=timezone.now(),
-            # updated_at=timezone.now()
         )
-        messages.success(request, f"User '{username}' updated successfully!")
+        messages.success(request, f"User '{username}' added successfully!")
         return redirect("master_user")
 
 
 # Edit user
 def edit_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+    user = get_object_or_404(User, pk=user_id)
+    profile, created = UserProfile.objects.get_or_create(user=user)
+
     departments = Department.objects.all()
 
     if request.method == "POST":
+        # update user fields
         user.username = request.POST.get("username")
         user.email = request.POST.get("email")
-        user.phone = request.POST.get("phone")
-        user.title = request.POST.get("title")
-        department_id = request.POST.get("department_id")
-        user.department = get_object_or_404(Department, department_id=department_id)
-        user.role = request.POST.get("role")
-        user.is_active = True if request.POST.get("is_active") == "on" else False
-        user.updated_at = timezone.now()
+        user.is_active = "is_active" in request.POST
         user.save()
-        messages.success( request,f"User '{user.username}' updated successfully!")
+
+        # update profile fields
+        profile.phone = request.POST.get("phone")
+        profile.title = request.POST.get("title")
+        profile.role = request.POST.get("role")
+        department_id = request.POST.get("department_id")
+        if department_id:
+            profile.department = Department.objects.get(pk=department_id)
+        profile.save()
+
+        messages.success(request, "User updated successfully!")
         return redirect("master_user")
 
-    return render(request, "edit_user.html", {"user": user, "departments": departments})
+    return render(request, "edit_user.html", {
+        "user": user,
+        "departments": departments,
+    })
 
 
-# Copy user (duplicate entry)
+# Copy user
 def copy_user(request, user_id):
-    user = get_object_or_404(User, user_id=user_id)
-    user.pk = None  # remove primary key
-    user.full_name = f"{user.full_name} (Copy)"
-    user.email = f"copy_{user.email}"
-    user.created_at = timezone.now()
-    user.updated_at = timezone.now()
-    user.save()
-    messages.success(request, "User copied successfully.")
+    user = get_object_or_404(User, id=user_id)
+    profile = user.profile
+
+    new_user = User.objects.create_user(
+        username=f"{user.username}_copy",
+        email=f"copy_{user.email}",
+        password="password123",  # set default password
+        is_active=user.is_active
+    )
+
+    UserProfile.objects.create(
+        user=new_user,
+        phone=profile.phone,
+        title=profile.title,
+        department=profile.department,
+        role=profile.role,
+    )
+
+    messages.success(request, f"User '{user.username}' copied successfully.")
     return redirect("master_user")
 
 
 # Delete user
 def delete_user(request, user_id):
-    # Get the user object
     user = get_object_or_404(User, id=user_id)
-
-    # Optional: delete the linked UserProfile first
-    try:
-        profile = UserProfile.objects.get(user=user)
-        profile.delete()
-    except UserProfile.DoesNotExist:
-        pass  # No profile to delete, continue
-
-    # Delete the user
+    username = user.username
     user.delete()
-
-    messages.success(request, f"User '{user.username}' deleted successfully!")
+    messages.success(request, f"User '{username}' deleted successfully!")
     return redirect("master_user")
+
 
 
 from django.shortcuts import render, redirect, get_object_or_404

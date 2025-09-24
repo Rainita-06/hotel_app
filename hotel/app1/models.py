@@ -5,11 +5,12 @@ from django.db import models
 # =========================
 # DEPARTMENT & USERS
 # =========================
-
+from django.contrib.auth.models import User
 class Department(models.Model):
     department_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100,blank=False, null=False)   # updated (was 120)
-    description = models.CharField(max_length=255, null=True, blank=True)         # added
+    description = models.CharField(max_length=255, null=True, blank=True)  
+    lead = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)       # added
 
     class Meta:
         db_table = 'department'
@@ -700,30 +701,72 @@ class GymVisit(models.Model):
 # COMPLAINTS
 # =========================
 from django.contrib.auth.models import User
+# class Complaint(models.Model):
+#     STATUS_CHOICES = [
+#         ("NEW", "New"),
+#         ("ACCEPTED", "Accepted"),
+#         ("ON_HOLD", "On Hold"),
+#         ("CLOSED", "Closed"),
+#     ]
+
+#     user = models.ForeignKey(User, on_delete=models.CASCADE,blank=False, null=False)  # complaint filed by a user
+#     category = models.CharField(max_length=100)
+#     title = models.CharField(max_length=200)
+#     description = models.TextField()
+#     location = models.CharField(max_length=50,blank=False, null=False)
+
+#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="NEW")
+#     owner = models.CharField(max_length=100,blank=False, null=False)
+#     created_on = models.DateTimeField(auto_now_add=True)
+#     due_date = models.DateTimeField(blank=True, null=True)
+
+#     class Meta:
+#         db_table = "complaint"
+
+#     def __str__(self):
+#         return f"{self.title} ({self.get_status_display()})"
+
 class Complaint(models.Model):
     STATUS_CHOICES = [
-        ("NEW", "New"),
+        ("PENDING", "Pending"),
+        ("ASSIGNED", "Assigned"),
         ("ACCEPTED", "Accepted"),
-        ("ON_HOLD", "On Hold"),
+        ("IN_PROGRESS", "In Progress"),
+        ("COMPLETED", "Completed"),
+        ("ESCALATED", "Escalated"),
+        ("REJECTED", "Rejected"),
         ("CLOSED", "Closed"),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE,blank=False, null=False)  # complaint filed by a user
-    category = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    location = models.CharField(max_length=50,blank=False, null=False)
-
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="NEW")
-    owner = models.CharField(max_length=100,blank=False, null=False)
+    location = models.CharField(max_length=50)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_complaints')
     created_on = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateTimeField(blank=True, null=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    sla_start = models.DateTimeField(null=True, blank=True)
+    sla_end = models.DateTimeField(null=True, blank=True)
+    picture = models.ImageField(upload_to='complaint_photos/', null=True, blank=True)
 
     class Meta:
-        db_table = "complaint"
+        db_table = 'complaint'
 
     def __str__(self):
-        return f"{self.title} ({self.get_status_display()})"
+        return f"{self.title} ({self.status})"
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'notification'
+
+    def __str__(self):
+        return f"Notification to {self.recipient.username}"
 
 
 # from django.db import models

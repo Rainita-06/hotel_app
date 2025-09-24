@@ -13,19 +13,43 @@
   </div>
 </div>
 
-<!-- Filter Buttons + New Request -->
-<div class="d-flex justify-content-between mb-3">
-  <div class="dropdown">
-  <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-    {% if status_filter %}{{ status_filter }}{% else %}Status{% endif %}
+<div class="dropdown ms-auto mb-3">
+  <button class="btn btn-light position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell"></i>
+
+    {% if unread_count > 0 %}
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        {{ unread_count }}
+        <span class="visually-hidden">unread notifications</span>
+      </span>
+    {% endif %}
   </button>
-  <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-    <li><a class="dropdown-item {% if status_filter == 'Pending' %}active{% endif %}" href="?status=Pending">NEW</a></li>
-    <li><a class="dropdown-item {% if status_filter == 'Closed' %}active{% endif %}" href="?status=Closed">Closed</a></li>
-    <li><a class="dropdown-item {% if status_filter == 'On Hold' %}active{% endif %}" href="?status=On Hold">In Progress</a></li>
-    <li><a class="dropdown-item {% if status_filter == 'All' %}active{% endif %}" href="?status=All">All</a></li>
+
+  <ul class="dropdown-menu dropdown-menu-end" style="width: 300px;">
+    {% for notif in notifications %}
+      <li class="px-3 py-2 {% if not notif.is_read %}fw-bold{% endif %}">
+        {{ notif.message|truncatechars:50 }}<br>
+        <small class="text-muted">{{ notif.created_on|date:"d-M-Y H:i" }}</small>
+      </li>
+    {% empty %}
+      <li class="px-3 py-2">No notifications</li>
+    {% endfor %}
   </ul>
 </div>
+
+
+<!-- Filter + New Complaint -->
+<div class="d-flex justify-content-between mb-3">
+  <div class="dropdown">
+    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+      {% if status_filter %}{{ status_filter }}{% else %}Status{% endif %}
+    </button>
+    <ul class="dropdown-menu">
+      {% for s in statuses %}
+        <li><a class="dropdown-item {% if status_filter == s %}active{% endif %}" href="?status={{ s }}">{{ s }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
 
   <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#addComplaintModal">+ New Request</button>
 </div>
@@ -36,40 +60,58 @@
     <thead class="table-light">
       <tr>
         <th>Requester</th>
+        <th>Department</th>
         <th>Location</th>
         <th>Title</th>
         <th>Description</th>
         <th>Status</th>
         <th>Owner</th>
         <th>Created On</th>
+        <th>SLA</th>
         <th>Due Date</th>
-        {% if is_admin %}<th>Action</th>{% endif %}
+        {% if is_admin or request.user.is_staff %}<th>Action</th>{% endif %}
       </tr>
     </thead>
     <tbody>
       {% for c in complaints %}
       <tr>
         <td>{{ c.user.username }}</td>
-        <td><b>{{ c.location }}</b></td>
+        <td>{% if c.department %}{{ c.department.name }}{% else %}-{% endif %}</td>
+        <td>{{ c.location }}</td>
         <td>{{ c.title }}</td>
         <td>{{ c.description }}</td>
         <td>
-          <span class="badge 
-            {% if c.status == 'NEW' %} bg-danger
-            {% elif c.status == 'ACCEPTED' %} bg-success
-            {% elif c.status == 'ON_HOLD' %} bg-warning text-dark
-            {% else %} bg-secondary{% endif %}">
-            {{ c.status }}
-          </span>
+          <span class="badge
+            {% if c.status == 'PENDING' %}bg-danger
+            {% elif c.status == 'ASSIGNED' %}bg-primary
+            {% elif c.status == 'ACCEPTED' %}bg-success
+            {% elif c.status == 'IN_PROGRESS' %}bg-warning text-dark
+            {% elif c.status == 'COMPLETED' %}bg-info text-dark
+            {% elif c.status == 'ESCALATED' %}bg-dark
+            {% elif c.status in 'REJECTED,CLOSED' %}bg-secondary
+            {% endif %}">{{ c.status }}</span>
         </td>
-        <td>{{ c.owner }}</td>
+        <td>{% if c.owner %}{{ c.owner.username }}{% else %}-{% endif %}</td>
         <td>{{ c.created_on|date:"d-M-Y H:i A" }}</td>
+        <td>{% if c.get_sla_duration %}{{ c.get_sla_duration }}{% elif c.sla_start %}{{ c.sla_start|timesince }} elapsed{% else %}-{% endif %}</td>
         <td>{% if c.due_date %}{{ c.due_date|date:"d-M-Y H:i A" }}{% else %}-{% endif %}</td>
-        {% if is_admin %}
+        {% if is_admin or request.user.is_staff or request.user == c.department.lead %}
         <td class="text-nowrap">
-          <a href="{% url 'update_complaint_status' c.id 'accept' %}" class="btn btn-sm btn-outline-primary">Accept</a>
-          <a href="{% url 'update_complaint_status' c.id 'assign' %}" class="btn btn-sm btn-outline-secondary">Assign</a>
-          <a href="{% url 'update_complaint_status' c.id 'close' %}" class="btn btn-sm btn-outline-danger">Close</a>
+       {% if c.owner == request.user and request.user == c.department.lead and c.status in 'PENDING,ASSIGNED' %}
+<button class="btn btn-sm btn-outline-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#assignModal{{ c.id }}">
+  Assign Team Member
+</button>
+{% endif %}
+
+
+          {% if c.status == 'ASSIGNED' and request.user == c.owner %}
+            <a href="{% url 'accept_complaint' c.id %}" class="btn btn-sm btn-outline-success">Accept</a>
+          {% endif %}
+          {% if c.status == 'ACCEPTED' and request.user == c.owner %}
+            <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#completeModal{{ c.id }}">Complete</button>
+          {% endif %}
         </td>
         {% endif %}
       </tr>
@@ -77,6 +119,66 @@
     </tbody>
   </table>
 </div>
+
+<!-- Assign Modals -->
+{% for c in complaints %}
+<div class="modal fade" id="assignModal{{ c.id }}" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'assign_complaint' c.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Assign Complaint #{{ c.id }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <select name="team_member_id" class="form-control" required>
+            <option value="">-- Select Team Member --</option>
+            {% for u in team_members %}
+              <option value="{{ u.id }}">{{ u.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Assign</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+<!-- Complete Complaint Modals -->
+{% for c in complaints %}
+  {% if c.status == 'ACCEPTED' and request.user == c.owner %}
+  <div class="modal fade" id="completeModal{{ c.id }}" tabindex="-1">
+    <div class="modal-dialog">
+      <form method="POST" action="{% url 'complete_complaint' c.id %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Complete Complaint #{{ c.id }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-2">
+              <label for="picture{{ c.id }}" class="form-label">Upload Picture</label>
+              <input type="file" name="picture" class="form-control" id="picture{{ c.id }}" required>
+            </div>
+            <p><strong>Location:</strong> {{ c.location }}</p>
+            <p><strong>Description:</strong> {{ c.description }}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-info">Complete</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+{% endfor %}
+
+
 
 <!-- Add Complaint Modal -->
 <div class="modal fade" id="addComplaintModal" tabindex="-1">
@@ -89,10 +191,20 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+          {% if request.user.is_staff or is_admin %}
           <select name="user_id" class="form-control mb-2" required>
             <option value="">-- Select User --</option>
             {% for u in users %}
               <option value="{{ u.id }}">{{ u.username }}</option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <input type="hidden" name="user_id" value="{{ request.user.id }}">
+          {% endif %}
+          <select name="department_id" class="form-control mb-2" required>
+            <option value="">-- Select Department --</option>
+            {% for d in departments %}
+              <option value="{{ d.department_id }}">{{ d.name }}</option>
             {% endfor %}
           </select>
           <input type="text" class="form-control mb-2" name="location" placeholder="Location" required>
@@ -106,4 +218,5 @@
     </form>
   </div>
 </div>
+
 {% endblock %}
