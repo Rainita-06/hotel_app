@@ -33,6 +33,9 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("master-user/", views.master_user, name="master_user"),
+      path("upload-avatar/", views.upload_avatar, name="upload_avatar"),
+      path('export-users/', views.export_users, name='export_users'),
+
     path("reports/service/", views.service_report, name="service_report"),
     path("user/add/", views.add_user, name="add_user"),
     path("user/<int:user_id>/edit/", views.edit_user, name="edit_user"),

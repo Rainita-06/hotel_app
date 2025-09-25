@@ -1032,13 +1032,13 @@ def master_user(request):
         users = users.filter(is_active=True)
     elif status_filter == "inactive":
         users = users.filter(is_active=False)
-
+    total_users = User.objects.count()
     # Pagination
     page_number = request.GET.get("page", 1)
     paginator = Paginator(users, 5)  # 5 users per page
     page_obj = paginator.get_page(page_number)
 
-    return render(request, "master_user_new.html", {
+    return render(request, "master.html", {
         "users": page_obj,
         "departments": departments,
         "role_filter": role_filter,
@@ -1046,6 +1046,8 @@ def master_user(request):
         "status_filter": status_filter,
         "paginator": paginator,
         "page_number": int(page_number),
+        "total_users":total_users,
+        
     })
 
 
@@ -1145,6 +1147,153 @@ def delete_user(request, user_id):
     messages.success(request, f"User '{username}' deleted successfully!")
     return redirect("master_user")
 
+import csv
+from django.http import HttpResponse
+from django.db.models import Q
+from .models import User, Department
+
+def export_users(request):
+    users = User.objects.all().select_related('profile')
+
+    # Filters same as master_user view
+    search = request.GET.get("search", "").strip()
+    role_filter = request.GET.get("role", "")
+    dept_filter = request.GET.get("department", "")
+    status_filter = request.GET.get("status", "")
+
+    if search:
+        users = users.filter(
+            Q(username__icontains=search) |
+            Q(email__icontains=search) |
+            Q(profile__phone__icontains=search)
+        )
+
+    if role_filter and role_filter != "all":
+        users = users.filter(profile__role__iexact=role_filter)
+
+    if dept_filter:
+        users = users.filter(profile__department_id=dept_filter)
+
+    if status_filter == "active":
+        users = users.filter(is_active=True)
+    elif status_filter == "inactive":
+        users = users.filter(is_active=False)
+
+    # Create CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="users.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Username', 'Email', 'Role', 'Department', 'Status'])
+
+    for user in users:
+        role = getattr(user.profile, 'role', '')
+        dept = getattr(user.profile.department, 'name', '') if getattr(user.profile, 'department', None) else ''
+        status = 'Active' if user.is_active else 'Inactive'
+        writer.writerow([user.username, user.email, role, dept, status])
+
+    return response
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.core.files.storage import default_storage
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
+from django.conf import settings
+import os, uuid
+
+# @csrf_exempt
+# @staff_member_required  # Only admin can upload for others
+# def upload_avatar(request):
+#     """
+#     Upload avatar for a specific user (user_id must be sent in POST).
+#     Replaces only that user's old avatar, leaves all others unchanged.
+#     """
+#     if request.method == "POST" and request.FILES.get("avatar"):
+#         user_id = request.POST.get("user_id") or request.GET.get("user_id")
+#         if not user_id:
+#             return JsonResponse({"error": "Missing user_id"}, status=400)
+
+#         try:
+#             target_user = User.objects.get(pk=user_id)
+#             profile = target_user.profile
+#         except User.DoesNotExist:
+#             return JsonResponse({"error": "User not found"}, status=404)
+
+#         file = request.FILES["avatar"]
+
+#         # delete old file if exists
+#         if profile.avatar_url:
+#             old_path = profile.avatar_url.replace(settings.MEDIA_URL, "")
+#             if default_storage.exists(old_path):
+#                 default_storage.delete(old_path)
+
+#         # save new file with unique name
+#         ext = os.path.splitext(file.name)[1]
+#         unique_name = f"{target_user.id}_{uuid.uuid4().hex}{ext}"
+#         filename = default_storage.save(os.path.join("avatars", unique_name), file)
+#         file_url = default_storage.url(filename)
+
+#         profile.avatar_url = file_url
+#         profile.save(update_fields=["avatar_url"])
+
+#         return JsonResponse({"url": file_url, "user_id": user_id})
+
+#     return JsonResponse({"error": "No file provided"}, status=400)
+
+
+import os
+import uuid
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.core.files.storage import default_storage
+from django.contrib.admin.views.decorators import staff_member_required
+from django.conf import settings
+from django.contrib.auth.models import User
+from app1.models import UserProfile  # import your profile model
+
+@csrf_exempt
+@staff_member_required  # Only admin can upload for others
+def upload_avatar(request):
+    """
+    Upload avatar for a specific user (user_id must be sent in POST).
+    Creates UserProfile if missing. Replaces old avatar.
+    """
+    if request.method == "POST" and request.FILES.get("avatar"):
+        user_id = request.POST.get("user_id") or request.GET.get("user_id")
+        if not user_id:
+            return JsonResponse({"error": "Missing user_id"}, status=400)
+
+        try:
+            target_user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        # Get or create UserProfile
+        profile, created = UserProfile.objects.get_or_create(user=target_user)
+
+        file = request.FILES["avatar"]
+
+        # delete old avatar if exists
+        if profile.avatar_url:
+            old_path = profile.avatar_url.replace(settings.MEDIA_URL, "")
+            if default_storage.exists(old_path):
+                default_storage.delete(old_path)
+
+        # save new file with unique name
+        ext = os.path.splitext(file.name)[1]
+        unique_name = f"{target_user.id}_{uuid.uuid4().hex}{ext}"
+        path = os.path.join("avatars", unique_name)
+        filename = default_storage.save(path, file)
+
+        # store persistent URL
+        profile.avatar_url = default_storage.url(filename)
+        profile.save(update_fields=["avatar_url"])
+
+        return JsonResponse({"url": profile.avatar_url, "user_id": user_id})
+
+    return JsonResponse({"error": "No file provided"}, status=400)
 
 
 from django.shortcuts import render, redirect, get_object_or_404

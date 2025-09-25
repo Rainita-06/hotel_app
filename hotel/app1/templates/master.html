@@ -35,27 +35,27 @@
         </div>
         <div class="w-4 h-6 left-[12px] top-[9px] absolute bg-black/0 border-gray-200">
           <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
-            <div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-              <div class="w-4 h-4 left-0 top-0 absolute bg-gray-400"></div>
-            </div>
+            <img src="{% static 'icon/search.svg'%}"class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden"/>
+              <!-- <div class="w-4 h-4 left-0 top-0 absolute bg-gray-400"></div> -->
+            <!-- </div> -->
           </div>
         </div>
       </div>
       <div class="w-7 h-10 relative bg-black/0 rounded-lg border-gray-200">
         <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
           <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-            <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-              <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div>
-            </div>
+            <img src="{% static 'icon/bell.svg'%}"class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden"/>
+              <!-- <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
+            <!-- </div> -->
           </div>
         </div>
       </div>
       <div class="w-7 h-10 relative bg-black/0 rounded-lg border-gray-200">
         <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
           <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-            <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-              <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div>
-            </div>
+            <img src="{% static 'icon/box.svg'%}" class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden"/>
+              <!-- <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
+            <!-- </div> -->
           </div>
         </div>
       </div>
@@ -67,70 +67,89 @@
     <div class="w-[1086px] h-24 left-[25px] top-[25px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
       <div class="w-[793px] h-10 bg-black/0 border-gray-200 flex justify-start items-center gap-4">
         <div class="w-80 h-10 relative bg-black/0 border-gray-200">
-          <div class="w-80 h-10 left-0 top-0 absolute bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-80 h-10 left-[40px] top-0 absolute justify-center text-gray-400 text-base font-normal font-['Inter'] leading-normal">Search by name or email...</div>
-          </div>
-          <div class="w-4 h-6 left-[12px] top-[9px] absolute bg-black/0 border-gray-200">
-            <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
-              <div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                <div class="w-4 h-4 left-0 top-0 absolute bg-gray-400"></div>
+          
+          <div class="w-80 h-10 relative bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
+           <form id="filterForm" class="flex items-center gap-4" method="GET"> 
+    <input 
+    type="text" 
+    name="search"
+    placeholder="Search by name or email..." 
+    class="w-80 h-10 px-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    value="{{ request.GET.search|default:'' }}"
+/>
+
+          <img src="{% static 'icon/search.svg'%}" alt="search image" class="w-4 h-6 left-[12px] top-[9px] absolute bg-black/0 border-gray-200"/>
+            <!-- <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center"> -->
+              <!-- <div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden"> -->
+                <!-- <div class="w-4 h-4 left-0 top-0 absolute bg-gray-400"></div> -->
+              <!-- </div> -->
+            <!-- </div> -->
+          <!-- </div> -->
+        <!-- </div> -->
+         <!-- Roles -->
+ <div class="w-28 h-10 relative">
+                  <select name="role"
+                          class="w-28 h-10 pl-3 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200 text-black text-base font-normal font-['Inter']">
+                      <option value="all">All Roles</option>
+                      <option value="admin" {% if role_filter == "admin" %}selected{% endif %}>Admin</option>
+                      <option value="user" {% if role_filter == "user" %}selected{% endif %}>User</option>
+                      <option value="manager" {% if role_filter == "manager" %}selected{% endif %}>Manager</option>
+                  </select>
               </div>
-            </div>
-          </div>
-        </div>
-        <div class="w-28 h-10 relative bg-black/0 border-gray-200">
-          <div class="w-28 h-10 left-0 top-0 absolute bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-16 h-10 left-[12px] top-0 absolute justify-center text-black text-base font-normal font-['Inter']">All Roles</div>
-            <div class="w-6 h-6 left-[84px] top-[8px] absolute overflow-hidden">
-              <div class="w-3.5 h-2 left-[6.50px] top-[9.08px] absolute bg-black"></div>
-            </div>
-          </div>
-          <div class="w-3 h-4 left-[94px] top-[13px] absolute bg-black/0 border-gray-200">
-            <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
-              <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                <div class="w-2.5 h-1.5 left-[0.75px] top-[3.75px] absolute bg-gray-400"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="w-44 h-10 relative bg-black/0 border-gray-200">
-          <div class="w-44 h-10 left-0 top-0 absolute bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-32 h-10 left-[12px] top-0 absolute justify-center text-black text-base font-normal font-['Inter']">All Departments</div>
-            <div class="w-6 h-6 left-[137px] top-[8px] absolute overflow-hidden">
-              <div class="w-3.5 h-2 left-[6.50px] top-[9.08px] absolute bg-black"></div>
-            </div>
-          </div>
-          <div class="w-3 h-4 left-[147px] top-[13px] absolute bg-black/0 border-gray-200">
-            <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
-              <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                <div class="w-2.5 h-1.5 left-[0.75px] top-[3.75px] absolute bg-gray-400"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="w-32 h-10 relative bg-black/0 border-gray-200">
-          <div class="w-32 h-10 left-0 top-0 absolute bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-16 h-10 left-[12px] top-0 absolute justify-center text-black text-base font-normal font-['Inter']">All Status</div>
-            <div class="w-6 h-6 left-[102px] top-[8px] absolute overflow-hidden">
-              <div class="w-3.5 h-2 left-[6.50px] top-[9.08px] absolute bg-black"></div>
-            </div>
-          </div>
-          <div class="w-3 h-4 left-[112px] top-[13px] absolute bg-black/0 border-gray-200">
-            <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
-              <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                <div class="w-2.5 h-1.5 left-[0.75px] top-[3.75px] absolute bg-gray-400"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
+  <!-- Departments -->
+    <div class="w-44 h-10 relative">
+  <select name="department"
+          class="w-44 h-10 pl-3 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200 text-black text-base font-normal font-['Inter']">
+      <option value="">All Departments</option>
+      {% for d in departments %}
+      <option value="{{ d.department_id }}" {% if dept_filter == d.department_id|stringformat:"s" %}selected{% endif %}>
+          {{ d.name }}
+      </option>
+      {% endfor %}
+  </select>
+</div>
+
+
+  <!-- Status -->
+  <div class="w-32 h-10 relative">
+                  <select name="status"
+                          class="w-32 h-10 pl-3 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200 text-black text-base font-normal font-['Inter']">
+                      <option value="">All Status</option>
+                      <option value="active" {% if status_filter == "active" %}selected{% endif %}>Active</option>
+                      <option value="inactive" {% if status_filter == "inactive" %}selected{% endif %}>Inactive</option>
+                  </select>
+              </div><a href="{% url 'master_user' %}" class="px-2 py-1 bg-gray-300 text-black rounded-lg hover:bg-gray-400 text-center">
+      Reset
+    </a>
+
+  
+
+
+                        <div class="w-3 h-4 left-[112px] top-[13px] absolute bg-black/0 border-gray-200">
+                            <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
+                                <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
+                                    <!-- <div class="w-2.5 h-1.5 left-[0.75px] top-[3.75px] absolute bg-gray-400"></div> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div></div>
+                </div></form>
+                <script>
+  // Auto-submit form when any dropdown changes
+  document.querySelectorAll('#filterForm select').forEach(function(select){
+    select.addEventListener('change', function() {
+      document.getElementById('filterForm').submit();
+    });
+  });
+</script>
       <div class="w-72 h-24 bg-black/0 border-gray-200 flex justify-start items-center gap-3">
         <div class="w-24 h-24 relative opacity-50 bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-green-500">
           <div class="w-3.5 h-5 left-[39.06px] top-[11px] absolute bg-black/0 border-gray-200">
             <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-              <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                <div class="w-3.5 h-2.5 left-0 top-[3px] absolute bg-green-500"></div>
-              </div>
+              <img src="{% static 'icon/enable.svg'%}" class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden"/>
+                <!-- <div class="w-3.5 h-2.5 left-0 top-[3px] absolute bg-green-500"></div> -->
+              <!-- </div> -->
             </div>
           </div>
           <div class="w-14 h-6 left-[24.53px] top-[35px] absolute text-center justify-start text-green-500 text-base font-normal font-['Inter']">Enable</div>
@@ -139,9 +158,9 @@
         <div class="w-24 h-24 relative opacity-50 bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-red-500">
           <div class="w-4 h-5 left-[38.06px] top-[11px] absolute bg-black/0 border-gray-200">
             <div class="w-4 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-              <div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                <div class="w-4 h-4 left-0 top-0 absolute bg-red-500"></div>
-              </div>
+              <img src="{% static 'icon/disable.svg'%}" class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden"/>
+                <!-- <div class="w-4 h-4 left-0 top-0 absolute bg-red-500"></div> -->
+              <!-- </div> -->
             </div>
           </div>
           <div class="w-16 h-6 left-[22.14px] top-[35px] absolute text-center justify-start text-red-500 text-base font-normal font-['Inter']">Disable</div>
@@ -150,13 +169,17 @@
         <div class="w-20 h-20 relative bg-sky-600 rounded-lg border-gray-200">
           <div class="w-3.5 h-5 left-[25.39px] top-[10px] absolute bg-black/0 border-gray-200">
             <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-              <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                <div class="w-3 h-3 left-[0.50px] top-[1.50px] absolute bg-white"></div>
-              </div>
+              <img src="{% static 'icon/plus.svg'%}" class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+                <!-- <div class="w-3 h-3 left-[0.50px] top-[1.50px] absolute bg-white"></div> -->
+              <!-- </div> -->
             </div>
           </div>
-          <div class="w-11 h-6 left-[16px] top-[34px] absolute text-center justify-start text-white text-base font-normal font-['Inter']">Invite</div>
-          <div class="w-10 h-6 left-[18.55px] top-[58px] absolute text-center justify-start text-white text-base font-normal font-['Inter']">User</div>
+          <div>
+    <button onclick="document.getElementById('addUserModal').classList.remove('hidden')" 
+      class="w-11 h-6 left-[16px] top-[34px] absolute text-center justify-start text-white text-base font-normal font-['Inter']">
+       Invite User
+    </button>
+  </div>
         </div>
       </div>
     </div>
@@ -165,24 +188,26 @@
     <div class="w-[1134px] h-20 left-[1px] top-[1px] absolute bg-black/0 border-b border-gray-200">
       <div class="w-[1086px] h-10 left-[24px] top-[16px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
         <div class="w-24 h-7 relative bg-black/0 border-gray-200">
-          <div class="w-24 h-7 left-0 top-[3px] absolute justify-start text-gray-900 text-lg font-semibold font-['Inter']">Users({{ users|length }})</div>
+          <div class="w-24 h-7 left-0 top-[3px] absolute justify-start text-gray-900 text-lg font-semibold font-['Inter']">Users ({{ total_users }})
+</div>
         </div>
         <div class="w-16 h-10 bg-black/0 border-gray-200 flex justify-start items-center gap-2">
           <div class="w-8 h-10 relative bg-black/0 rounded-lg border-gray-200">
             <div class="w-4 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
               <div class="w-4 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                <img src="{% static 'icon/export.svg'%}" alt="User Image" class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                  <!-- <div class="w-4 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
-                
+                <a href="{% url 'export_users' %}?search={{ request.GET.search }}&role={{ request.GET.role }}&department={{ request.GET.department }}&status={{ request.GET.status }}">
+  <img src="{% static 'icon/export.svg'%}" alt="Export Users" class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+</a>
+
               </div>
             </div>
           </div>
           <div class="w-8 h-10 relative bg-black/0 rounded-lg border-gray-200">
             <div class="w-4 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
               <div class="w-4 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                <div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                  <div class="w-4 h-3.5 left-0 top-[1px] absolute bg-gray-600"></div>
-                </div>
+                <img src="{% static 'icon/filter.svg'%}" alt="Filter Image" class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden"/>
+                  <!-- <div class="w-4 h-3.5 left-0 top-[1px] absolute bg-gray-600"></div> -->
+                
               </div>
             </div>
           </div>
@@ -204,7 +229,7 @@
                 <div class="w-2 h-4 relative bg-black/0 border-gray-200">
                   <div class="w-2 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
                     <div class="w-2 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                      <div class="w-2 h-2.5 left-0 top-[0.75px] absolute bg-gray-400"></div>
+                      <!-- <div class="w-2 h-2.5 left-0 top-[0.75px] absolute bg-gray-400"></div> -->
                     </div>
                   </div>
                 </div>
@@ -231,367 +256,246 @@
             </div>
           </div>
         </div>
-        <div class="w-[1134px] h-[564px] left-0 top-[56px] absolute bg-white border-gray-200">
-          <div class="w-[1134px] h-28 left-0 top-0 absolute bg-black/0 border-gray-200">
+        <div class="w-[1134px] h-[564px] left-0 top-[56px] relative bg-white border-gray-200">
+          {% for u in users %}
+          <div class="w-[1134px] h-28 left-0 top-0 relative bg-black/0 border-gray-200">
             <div class="w-16 h-28 left-0 top-0 absolute bg-black/0 border-gray-200">
               <div class="w-3 h-3 left-[24px] top-[49px] absolute bg-white rounded-[1px] border-[0.50px] border-black"></div>
             </div>
             <div class="w-40 h-28 left-[61px] top-0 absolute bg-black/0 border-gray-200">
               <div class="w-28 h-20 left-[24px] top-[16px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-center gap-3">
-                <img class="w-10 h-10 relative rounded-full border-gray-200" src="https://placehold.co/40x40" />
+                <div class="flex items-center gap-2" data-user-id="{{ u.id }}">
+  <label class="relative cursor-pointer">
+    <img id="avatarPreview-{{ u.id }}"
+         class="w-10 h-10 rounded-full border object-cover"
+         src="{{ u.profile.avatar_url|default:'https://placehold.co/40x40' }}"
+         alt="Profile of {{ u.username }}">
+    <input type="file"
+           accept="image/*"
+           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+           data-user-id="{{ u.id }}">
+  </label>
+</div>
                 <div class="w-14 h-20 relative bg-black/0 border-gray-200">
                   <div class="w-14 h-10 left-0 top-0 absolute bg-black/0 border-gray-200">
-                    <div class="w-11 h-5 left-0 top-[1px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Sarah</div>
-                    <div class="w-14 h-5 left-0 top-[21px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Johnson</div>
+                    <div class="w-28 h-5 left-0 top-[1px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">{{ u.username }}</div>
+                    <!-- <div class="w-14 h-5 left-0 top-[21px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Johnson</div> -->
                   </div>
                   <div class="w-14 h-10 left-0 top-[40px] absolute bg-black/0 border-gray-200">
                     <div class="w-6 h-5 left-0 top-[1px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ID:</div>
-                    <div class="w-14 h-5 left-0 top-[21px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">USR001</div>
+                    <div class="w-14 h-5 left-0 top-[21px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">USR{{ u.id|stringformat:"03d" }}</div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="w-64 h-28 left-[217.48px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-48 h-5 left-[24px] top-[47px] absolute justify-start text-gray-900 text-sm font-normal font-['Inter']">sarah.johnson@victoire.com</div>
+              <div class="w-48 h-5 left-[24px] top-[47px] absolute justify-start text-gray-900 text-sm font-normal font-['Inter']">{{ u.email }}</div>
             </div>
             <div class="w-28 h-28 left-[468.33px] top-0 absolute bg-black/0 border-gray-200">
               <div class="w-16 h-5 px-2.5 py-0.5 left-[24px] top-[48px] absolute bg-fuchsia-700/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="w-14 h-4 justify-start text-fuchsia-700 text-xs font-medium font-['Inter']">Manager</div>
+                <div class="w-14 h-4 justify-start text-fuchsia-700 text-xs font-medium font-['Inter']">{{ u.profile.role|title }}</div>
               </div>
             </div>
             <div class="w-44 h-28 left-[587.27px] top-0 absolute bg-black/0 border-gray-200">
               <div class="w-32 h-11 left-[24px] top-[34px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-start gap-1 flex-wrap content-start">
                 <div class="w-24 self-stretch px-2 py-0.5 bg-neutral-100 rounded border-gray-200 flex justify-start items-center">
-                  <div class="w-20 h-4 justify-start text-neutral-800 text-xs font-medium font-['Inter']">Housekeeping</div>
+                  <div class="w-20 h-4 justify-start text-neutral-800 text-xs font-medium font-['Inter']">{{ u.profile.department.name }}</div>
                 </div>
-                <div class="w-20 self-stretch px-2 py-0.5 bg-neutral-100 rounded border-gray-200 flex justify-start items-center">
+                <!-- <div class="w-20 self-stretch px-2 py-0.5 bg-neutral-100 rounded border-gray-200 flex justify-start items-center">
                   <div class="w-16 h-4 justify-start text-neutral-800 text-xs font-medium font-['Inter']">Front Desk</div>
-                </div>
+                </div> -->
               </div>
             </div>
-            <div class="w-36 h-28 left-[764.25px] top-0 absolute bg-black/0 border-gray-200">
+            <div class="w-36 h-28 left-[764.25px] top-0 absolute bg-black/0 border-gray-200">{% if u.is_active %}
               <div class="w-20 h-5 px-2.5 py-0.5 left-[24px] top-[48px] absolute bg-green-500/10 rounded-full border-gray-200 inline-flex justify-start items-center">
                 <div class="pr-1 bg-black/0 inline-flex flex-col justify-start items-start overflow-hidden">
                   <div class="w-3 h-4 relative bg-black/0 border-gray-200">
                     <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
                       <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                        <div class="w-3 h-3 left-0 top-0 absolute bg-green-500"></div>
+                        <!-- <div class="w-3 h-3 left-0 top-0 absolute bg-green-500"></div> -->
                       </div>
                     </div>
                   </div>
                 </div>
+                <img src="{% static 'icon/active.svg' %}" alt="Frame Icon" class="w-3 h-3 mr-3" />
                 <div class="w-10 h-4 justify-start text-green-500 text-xs font-medium font-['Inter']">Active</div>
-              </div>
-            </div>
+             {% else %}
+                                    
+              <div class="w-36 h-28 relative bg-black/0 border-gray-200">
+    <div class="w-20 h-5 px-2.5 py-0.5 left-[24px] top-[48px] absolute bg-yellow-400/10 rounded-full border-gray-200 inline-flex justify-start items-center">
+        
+         <img src="{% static 'icon/Frame.svg' %}" alt="Frame Icon" class="w-3 h-3 mr-3" />
+        <div class="w-12 h-4 justify-start text-yellow-400 text-xs font-medium font-['Inter']">Inactive</div>
+    
+</div>{% endif %}
+                                </div>
+                            </div>
             <div class="w-28 h-28 left-[913.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-14 h-5 left-[24px] top-[37px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">2 hours</div>
-              <div class="w-7 h-5 left-[24px] top-[57px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ago</div>
+              <div class="w-14 h-5 left-[24px] top-[37px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">{{ u.last_login|default:"-" }}</div>
+              <!-- <div class="w-7 h-5 left-[24px] top-[57px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ago</div> -->
             </div>
             <div class="w-28 h-28 left-[1027.78px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-5 h-10 left-[62.22px] top-[36px] absolute bg-black/0 border-gray-200">
-                <div class="w-1 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
-                  <div class="w-1 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                    <div class="w-1 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                      <div class="w-1 h-3.5 left-[0.25px] top-[1.25px] absolute bg-gray-400"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="w-[1134px] h-28 left-0 top-[112.50px] absolute bg-black/0 border-t border-gray-200">
-            <div class="w-16 h-28 left-0 top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-3 h-3 left-[24px] top-[49.50px] absolute bg-white rounded-[1px] border-[0.50px] border-black"></div>
-            </div>
-            <div class="w-40 h-28 left-[61px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-28 h-20 left-[24px] top-[16.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-center gap-3">
-                <img class="w-10 h-10 relative rounded-full border-gray-200" src="https://placehold.co/40x40" />
-                <div class="w-14 h-20 relative bg-black/0 border-gray-200">
-                  <div class="w-14 h-10 left-0 top-0 absolute bg-black/0 border-gray-200">
-                    <div class="w-14 h-5 left-0 top-[1px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Michael</div>
-                    <div class="w-10 h-5 left-0 top-[21px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Chen</div>
-                  </div>
-                  <div class="w-14 h-10 left-0 top-[40px] absolute bg-black/0 border-gray-200">
-                    <div class="w-6 h-5 left-0 top-[1px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ID:</div>
-                    <div class="w-14 h-5 left-0 top-[21px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">USR002</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="w-64 h-28 left-[217.48px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-48 h-5 left-[24px] top-[47.50px] absolute justify-start text-gray-900 text-sm font-normal font-['Inter']">michael.chen@victoire.com</div>
-            </div>
-            <div class="w-28 h-28 left-[468.33px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-14 h-5 px-2.5 py-0.5 left-[24px] top-[48.50px] absolute bg-sky-600/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="w-10 h-4 justify-start text-sky-600 text-xs font-medium font-['Inter']">Admin</div>
-              </div>
-            </div>
-            <div class="w-44 h-28 left-[587.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-32 h-5 left-[24px] top-[46.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-start gap-1 flex-wrap content-start">
-                <div class="w-20 self-stretch px-2 py-0.5 bg-neutral-100 rounded border-gray-200 flex justify-start items-center">
-                  <div class="w-16 h-4 justify-start text-neutral-800 text-xs font-medium font-['Inter']">IT Support</div>
-                </div>
-              </div>
-            </div>
-            <div class="w-36 h-28 left-[764.25px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-20 h-5 px-2.5 py-0.5 left-[24px] top-[48.50px] absolute bg-green-500/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="pr-1 bg-black/0 inline-flex flex-col justify-start items-start overflow-hidden">
-                  <div class="w-3 h-4 relative bg-black/0 border-gray-200">
-                    <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
-                      <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                        <div class="w-3 h-3 left-0 top-0 absolute bg-green-500"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="w-10 h-4 justify-start text-green-500 text-xs font-medium font-['Inter']">Active</div>
-              </div>
-            </div>
-            <div class="w-28 h-28 left-[913.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-5 h-5 left-[24px] top-[27.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">15</div>
-              <div class="w-14 h-5 left-[24px] top-[47.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">minutes</div>
-              <div class="w-7 h-5 left-[24px] top-[67.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ago</div>
-            </div>
-            <div class="w-28 h-28 left-[1027.78px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-5 h-10 left-[62.22px] top-[36.50px] absolute bg-black/0 border-gray-200">
-                <div class="w-1 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
-                  <div class="w-1 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                    <div class="w-1 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                      <div class="w-1 h-3.5 left-[0.25px] top-[1.25px] absolute bg-gray-400"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="w-[1134px] h-28 left-0 top-[225.50px] absolute bg-black/0 border-t border-gray-200">
-            <div class="w-16 h-28 left-0 top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-3 h-3 left-[24px] top-[49.50px] absolute bg-white rounded-[1px] border-[0.50px] border-black"></div>
-            </div>
-            <div class="w-40 h-28 left-[61px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-28 h-20 left-[24px] top-[16.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-center gap-3">
-                <img class="w-10 h-10 relative rounded-full border-gray-200" src="https://placehold.co/40x40" />
-                <div class="w-16 h-20 relative bg-black/0 border-gray-200">
-                  <div class="w-16 h-10 left-0 top-0 absolute bg-black/0 border-gray-200">
-                    <div class="w-12 h-5 left-0 top-[1px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Emma</div>
-                    <div class="w-16 h-5 left-0 top-[21px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Rodriguez</div>
-                  </div>
-                  <div class="w-16 h-10 left-0 top-[40px] absolute bg-black/0 border-gray-200">
-                    <div class="w-6 h-5 left-0 top-[1px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ID:</div>
-                    <div class="w-14 h-5 left-0 top-[21px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">USR003</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="w-64 h-28 left-[217.48px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-52 h-5 left-[24px] top-[47.50px] absolute justify-start text-gray-900 text-sm font-normal font-['Inter']">emma.rodriguez@victoire.com</div>
-            </div>
-            <div class="w-28 h-28 left-[468.33px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-12 h-5 px-2.5 py-0.5 left-[24px] top-[48.50px] absolute bg-teal-500/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="w-8 h-4 justify-start text-teal-500 text-xs font-medium font-['Inter']">Staff</div>
-              </div>
-            </div>
-            <div class="w-44 h-28 left-[587.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-32 h-5 left-[24px] top-[46.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-start gap-1 flex-wrap content-start">
-                <div class="w-24 self-stretch px-2 py-0.5 bg-neutral-100 rounded border-gray-200 flex justify-start items-center">
-                  <div class="w-20 h-4 justify-start text-neutral-800 text-xs font-medium font-['Inter']">Maintenance</div>
-                </div>
-              </div>
-            </div>
-            <div class="w-36 h-28 left-[764.25px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-20 h-5 px-2.5 py-0.5 left-[24px] top-[48.50px] absolute bg-yellow-400/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="pr-1 bg-black/0 inline-flex flex-col justify-start items-start overflow-hidden">
-                  <div class="w-3 h-4 relative bg-black/0 border-gray-200">
-                    <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
-                      <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                        <div class="w-3 h-3 left-0 top-0 absolute bg-yellow-400"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="w-12 h-4 justify-start text-yellow-400 text-xs font-medium font-['Inter']">Inactive</div>
-              </div>
-            </div>
-            <div class="w-28 h-28 left-[913.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-12 h-5 left-[24px] top-[37.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">3 days</div>
-              <div class="w-7 h-5 left-[24px] top-[57.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ago</div>
-            </div>
-            <div class="w-28 h-28 left-[1027.78px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-5 h-10 left-[62.22px] top-[36.50px] absolute bg-black/0 border-gray-200">
-                <div class="w-1 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
-                  <div class="w-1 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                    <div class="w-1 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                      <div class="w-1 h-3.5 left-[0.25px] top-[1.25px] absolute bg-gray-400"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="w-[1134px] h-28 left-0 top-[338.50px] absolute bg-black/0 border-t border-gray-200">
-            <div class="w-16 h-28 left-0 top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-3 h-3 left-[24px] top-[49.50px] absolute bg-white rounded-[1px] border-[0.50px] border-black"></div>
-            </div>
-            <div class="w-40 h-28 left-[61px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-28 h-20 left-[24px] top-[16.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-center gap-3">
-                <img class="w-10 h-10 relative rounded-full border-gray-200" src="https://placehold.co/40x40" />
-                <div class="w-14 h-20 relative bg-black/0 border-gray-200">
-                  <div class="w-14 h-10 left-0 top-0 absolute bg-black/0 border-gray-200">
-                    <div class="w-11 h-5 left-0 top-[1px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">David</div>
-                    <div class="w-8 h-5 left-0 top-[21px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Kim</div>
-                  </div>
-                  <div class="w-14 h-10 left-0 top-[40px] absolute bg-black/0 border-gray-200">
-                    <div class="w-6 h-5 left-0 top-[1px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ID:</div>
-                    <div class="w-14 h-5 left-0 top-[21px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">USR004</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="w-64 h-28 left-[217.48px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-40 h-5 left-[24px] top-[47.50px] absolute justify-start text-gray-900 text-sm font-normal font-['Inter']">david.kim@victoire.com</div>
-            </div>
-            <div class="w-28 h-28 left-[468.33px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-12 h-5 px-2.5 py-0.5 left-[24px] top-[48.50px] absolute bg-teal-500/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="w-8 h-4 justify-start text-teal-500 text-xs font-medium font-['Inter']">Staff</div>
-              </div>
-            </div>
-            <div class="w-44 h-28 left-[587.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-32 h-5 left-[24px] top-[46.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-start gap-1 flex-wrap content-start">
-                <div class="w-10 self-stretch px-2 py-0.5 bg-neutral-100 rounded border-gray-200 flex justify-start items-center">
-                  <div class="w-7 h-4 justify-start text-neutral-800 text-xs font-medium font-['Inter']">F&B</div>
-                </div>
-              </div>
-            </div>
-            <div class="w-36 h-28 left-[764.25px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-24 h-5 px-2.5 py-0.5 left-[24px] top-[48.50px] absolute bg-red-500/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="pr-1 bg-black/0 inline-flex flex-col justify-start items-start overflow-hidden">
-                  <div class="w-3 h-4 relative bg-black/0 border-gray-200">
-                    <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
-                      <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                        <div class="w-3 h-3 left-0 top-0 absolute bg-red-500"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="w-16 h-4 justify-start text-red-500 text-xs font-medium font-['Inter']">Suspended</div>
-              </div>
-            </div>
-            <div class="w-28 h-28 left-[913.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-12 h-5 left-[24px] top-[37.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">1 week</div>
-              <div class="w-7 h-5 left-[24px] top-[57.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ago</div>
-            </div>
-            <div class="w-28 h-28 left-[1027.78px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-5 h-10 left-[62.22px] top-[36.50px] absolute bg-black/0 border-gray-200">
-                <div class="w-1 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
-                  <div class="w-1 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                    <div class="w-1 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                      <div class="w-1 h-3.5 left-[0.25px] top-[1.25px] absolute bg-gray-400"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="w-[1134px] h-28 left-0 top-[451.50px] absolute bg-black/0 border-t border-gray-200">
-            <div class="w-16 h-28 left-0 top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-3 h-3 left-[24px] top-[49.50px] absolute bg-white rounded-[1px] border-[0.50px] border-black"></div>
-            </div>
-            <div class="w-40 h-28 left-[61px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-28 h-20 left-[24px] top-[16.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-center gap-3">
-                <img class="w-10 h-10 relative rounded-full border-gray-200" src="https://placehold.co/40x40" />
-                <div class="w-16 h-20 relative bg-black/0 border-gray-200">
-                  <div class="w-16 h-10 left-0 top-0 absolute bg-black/0 border-gray-200">
-                    <div class="w-8 h-5 left-0 top-[1px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Lisa</div>
-                    <div class="w-16 h-5 left-0 top-[21px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">Thompson</div>
-                  </div>
-                  <div class="w-16 h-10 left-0 top-[40px] absolute bg-black/0 border-gray-200">
-                    <div class="w-6 h-5 left-0 top-[1px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ID:</div>
-                    <div class="w-14 h-5 left-0 top-[21px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">USR005</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="w-64 h-28 left-[217.48px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-48 h-5 left-[24px] top-[47.50px] absolute justify-start text-gray-900 text-sm font-normal font-['Inter']">lisa.thompson@victoire.com</div>
-            </div>
-            <div class="w-28 h-28 left-[468.33px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-16 h-5 px-2.5 py-0.5 left-[24px] top-[48.50px] absolute bg-fuchsia-700/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="w-14 h-4 justify-start text-fuchsia-700 text-xs font-medium font-['Inter']">Manager</div>
-              </div>
-            </div>
-            <div class="w-44 h-28 left-[587.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-32 h-11 left-[24px] top-[34.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-start gap-1 flex-wrap content-start">
-                <div class="w-20 self-stretch px-2 py-0.5 bg-neutral-100 rounded border-gray-200 flex justify-start items-center">
-                  <div class="w-16 h-4 justify-start text-neutral-800 text-xs font-medium font-['Inter']">Front Desk</div>
-                </div>
-                <div class="w-20 self-stretch px-2 py-0.5 bg-neutral-100 rounded border-gray-200 flex justify-start items-center">
-                  <div class="w-16 h-4 justify-start text-neutral-800 text-xs font-medium font-['Inter']">Concierge</div>
-                </div>
-              </div>
-            </div>
-            <div class="w-36 h-28 left-[764.25px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-20 h-5 px-2.5 py-0.5 left-[24px] top-[48.50px] absolute bg-green-500/10 rounded-full border-gray-200 inline-flex justify-start items-center">
-                <div class="pr-1 bg-black/0 inline-flex flex-col justify-start items-start overflow-hidden">
-                  <div class="w-3 h-4 relative bg-black/0 border-gray-200">
-                    <div class="w-3 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
-                      <div class="w-3 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                        <div class="w-3 h-3 left-0 top-0 absolute bg-green-500"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="w-10 h-4 justify-start text-green-500 text-xs font-medium font-['Inter']">Active</div>
-              </div>
-            </div>
-            <div class="w-28 h-28 left-[913.27px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-11 h-5 left-[24px] top-[37.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">1 hour</div>
-              <div class="w-7 h-5 left-[24px] top-[57.50px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">ago</div>
-            </div>
-            <div class="w-28 h-28 left-[1027.78px] top-0 absolute bg-black/0 border-gray-200">
-              <div class="w-5 h-10 left-[62.22px] top-[36.50px] absolute bg-black/0 border-gray-200">
-                <div class="w-1 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
-                  <div class="w-1 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                    <div class="w-1 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                      <div class="w-1 h-3.5 left-[0.25px] top-[1.25px] absolute bg-gray-400"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+  <div class="w-5 h-10 left-[62.22px] top-[36px] absolute bg-black/0 border-gray-200">
+    <div class="w-1 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
+      <div class="w-1 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center relative">
+        <!-- Three dot icon -->
+        <img src="{% static 'icon/dot.svg'%}" alt="dot action image" class="cursor-pointer dotMenuBtn w-5 h-5"/>
+
+        <!-- Dropdown menu (hidden by default) -->
+        <div class="dotMenu absolute top-6 right-0 bg-white border rounded shadow-lg flex flex-col gap-1 p-1 z-50 hidden">
+          <a href="{% url 'edit_user' u.id %}" class="px-2 py-1 border rounded text-blue-600 hover:bg-blue-50 text-xs">✏️ Edit</a>
+          <a href="{% url 'delete_user' u.id %}" onclick="return confirm('Delete this user?');" class="px-2 py-1 border rounded text-red-600 hover:bg-red-50 text-xs">🗑️ Delete</a>
         </div>
-      </div>
-    </div>
-    <div class="w-[1134px] h-16 left-[1px] top-[694px] absolute bg-black/0 border-t border-gray-200">
-      <div class="w-[1086px] h-9 left-[24px] top-[17px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
-        <div class="w-48 h-5 relative bg-black/0 border-gray-200">
-          <div class="w-48 h-5 left-0 top-[1px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">Showing 1 to 5 of 247 results</div>
-        </div>
-        <div class="w-96 h-9 bg-black/0 border-gray-200 flex justify-start items-center gap-2">
-          <div class="w-20 h-9 relative bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-16 h-5 left-[13px] top-[10px] absolute text-center justify-start text-gray-600 text-sm font-normal font-['Inter']">Previous</div>
-          </div>
-          <div class="w-7 h-9 relative bg-sky-600 rounded-lg border-gray-200">
-            <div class="w-2.5 h-5 left-[12px] top-[9px] absolute text-center justify-start text-white text-sm font-normal font-['Inter']">1</div>
-          </div>
-          <div class="w-9 h-9 relative bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-3.5 h-5 left-[13px] top-[10px] absolute text-center justify-start text-gray-600 text-sm font-normal font-['Inter']">2</div>
-          </div>
-          <div class="w-9 h-9 relative bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-3.5 h-5 left-[13px] top-[10px] absolute text-center justify-start text-gray-600 text-sm font-normal font-['Inter']">3</div>
-          </div>
-          <div class="w-9 h-9 relative bg-black/0 border-gray-200">
-            <div class="w-4 h-5 left-[12px] top-[9px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">...</div>
-          </div>
-          <div class="w-11 h-9 relative bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-5 h-5 left-[13px] top-[10px] absolute text-center justify-start text-gray-600 text-sm font-normal font-['Inter']">25</div>
-          </div>
-          <div class="w-14 h-9 relative bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-            <div class="w-9 h-5 left-[13px] top-[10px] absolute text-center justify-start text-gray-600 text-sm font-normal font-['Inter']">Next</div>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
+</div></div>
+          <div class=" relative bg-black/0 border-t border-gray-200">
+            <div class="w-16 h-28 left-0 top-0 absolute bg-black/0 border-gray-200">
+              <!-- <div class="w-3 h-3 left-[24px] top-[49.50px] absolute bg-white rounded-[1px] border-[0.50px] border-black"></div> -->
+            </div>
+          
+            
+          </div>{% endfor %}
+        </div>
+      </div>
+    </div>
+    <div id="addUserModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+    <form method="POST" action="{% url 'add_user' %}">
+      {% csrf_token %}
+      <div class="p-4 border-b">
+        <h5 class="text-lg font-semibold">Invite New User</h5>
+      </div>
+      <div class="p-4 space-y-3">
+        <input type="text" name="username" placeholder="Full Name" required class="w-full px-3 py-2 border rounded-md">
+        <input type="email" name="email" placeholder="Email" required class="w-full px-3 py-2 border rounded-md">
+        <input type="text" name="phone" placeholder="Phone" class="w-full px-3 py-2 border rounded-md">
+        <input type="text" name="title" placeholder="Title" class="w-full px-3 py-2 border rounded-md">
+        <input type="password" name="password" placeholder="Password" required class="w-full px-3 py-2 border rounded-md">
+
+        <select name="department_id" required class="w-full px-3 py-2 border rounded-md">
+          <option value="">-- Select Department --</option>
+          {% for d in departments %}
+            <option value="{{ d.department_id }}">{{ d.name }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="role" required class="w-full px-3 py-2 border rounded-md">
+          <option value="staff">Staff</option>
+          <option value="manager">Manager</option>
+          <option value="admin">Admin</option>
+        </select>
+
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" name="is_active" checked class="h-4 w-4">
+          <span>Active</span>
+        </label>
+      </div>
+      <div class="p-4 border-t flex justify-end space-x-2">
+        <button type="button" onclick="document.getElementById('addUserModal').classList.add('hidden')" 
+          class="px-3 py-2 border rounded-md text-gray-600 hover:bg-gray-100">Cancel</button>
+        <button type="submit" class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
+      </div>
+    </form>
+  </div>
 </div>
+
+            <div class="w-[1134px] h-16 left-[1px] top-[694px] absolute bg-black/0 border-t border-gray-200">
+    <div class="w-[1086px] h-9 left-[24px] top-[17px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
+
+        <!-- Showing results -->
+        <div class="w-48 h-5 relative bg-black/0 border-gray-200">
+            <div class="w-48 h-5 left-0 top-[1px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">
+                Showing {{ users.start_index }} to {{ users.end_index }} of {{ users.paginator.count }} results
+            </div>
+        </div>
+
+        <!-- Pagination buttons -->
+        <div class="w-96 h-9 bg-black/0 border-gray-200 flex justify-start items-center gap-2">
+            
+            <!-- Previous -->
+            {% if users.has_previous %}
+            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode|safe }}&{% endif %}page={{ users.previous_page_number }}"
+               class="w-20 h-9 relative bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200 flex items-center justify-center text-gray-600 text-sm font-normal font-['Inter']">
+               Previous
+            </a>
+            {% else %}
+            <div class="w-20 h-9 relative bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm font-normal">Previous</div>
+            {% endif %}
+
+            <!-- Page numbers (show range near current page) -->
+            {% for num in users.paginator.page_range %}
+                {% if num > users.number|add:'-3' and num < users.number|add:'3' %}
+                    {% if num == users.number %}
+                        <div class="w-7 h-9 relative bg-sky-600 rounded-lg flex items-center justify-center text-white text-sm font-normal font-['Inter']">{{ num }}</div>
+                    {% else %}
+                        <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode|safe }}&{% endif %}page={{ num }}"
+                           class="w-9 h-9 relative bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200 flex items-center justify-center text-gray-600 text-sm font-normal font-['Inter']">
+                           {{ num }}
+                        </a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            <!-- Next -->
+            {% if users.has_next %}
+            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode|safe }}&{% endif %}page={{ users.next_page_number }}"
+               class="w-14 h-9 relative bg-black/0 rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200 flex items-center justify-center text-gray-600 text-sm font-normal font-['Inter']">
+               Next
+            </a>
+            {% else %}
+            <div class="w-14 h-9 relative bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm font-normal">Next</div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+</div></div></div>
+
+
+<script>
+document.querySelectorAll('input[type="file"][data-user-id]').forEach(input => {
+  input.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const userId = e.target.dataset.userId;
+    const preview = document.getElementById(`avatarPreview-${userId}`);
+    preview.src = URL.createObjectURL(file);
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+    formData.append('user_id', userId);
+
+    fetch("{% url 'upload_avatar' %}", {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.url) preview.src = data.url;
+      else alert(data.error || 'Upload failed');
+    })
+    .catch(() => alert('Upload failed'));
+  });
+});
+</script>
+<script>
+document.querySelectorAll('.dotMenuBtn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation(); // Prevent closing immediately
+    const menu = btn.nextElementSibling;
+    menu.classList.toggle('hidden');
+  });
+});
+
+// Close all menus if clicking outside
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dotMenu').forEach(menu => menu.classList.add('hidden'));
+});
+</script>
+
 {% endblock %}
