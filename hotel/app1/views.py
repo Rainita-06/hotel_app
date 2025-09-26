@@ -1304,6 +1304,41 @@ from django.contrib import messages
 # -------------------------------
 # Locations List & Filter
 # -------------------------------
+# def locations_list(request):
+#     locations = Location.objects.all()
+#     families = LocationFamily.objects.all()
+#     types = LocationType.objects.all()
+#     floors = Floor.objects.all()
+#     buildings = Building.objects.all()
+
+#     # Filters
+#     family_filter = request.GET.get('family')
+#     type_filter = request.GET.get('type')
+#     floor_filter = request.GET.get('floor')
+#     building_filter = request.GET.get('building')
+
+#     if family_filter:
+#         locations = locations.filter(family_id=family_filter)
+#     if type_filter:
+#         locations = locations.filter(type_id=type_filter)
+#     if floor_filter:
+#         locations = locations.filter(floor_id=floor_filter)
+#     if building_filter:
+#         locations = locations.filter(building_id=building_filter)
+
+#     context = {
+#         'locations': locations,
+#         'families': families,
+#         'types': types,
+#         'floors': floors,
+#         'buildings': buildings,
+#         'selected_family': family_filter,
+#         'selected_type': type_filter,
+#         'selected_floor': floor_filter,
+#         'selected_building': building_filter,
+#     }
+#     return render(request, 'locations_list.html', context)
+
 def locations_list(request):
     locations = Location.objects.all()
     families = LocationFamily.objects.all()
@@ -1316,6 +1351,7 @@ def locations_list(request):
     type_filter = request.GET.get('type')
     floor_filter = request.GET.get('floor')
     building_filter = request.GET.get('building')
+    search_query = request.GET.get('search')
 
     if family_filter:
         locations = locations.filter(family_id=family_filter)
@@ -1325,6 +1361,8 @@ def locations_list(request):
         locations = locations.filter(floor_id=floor_filter)
     if building_filter:
         locations = locations.filter(building_id=building_filter)
+    if search_query:
+        locations = locations.filter(name__icontains=search_query) 
 
     context = {
         'locations': locations,
@@ -1336,9 +1374,63 @@ def locations_list(request):
         'selected_type': type_filter,
         'selected_floor': floor_filter,
         'selected_building': building_filter,
+        'search_query': search_query,
     }
-    return render(request, 'locations_list.html', context)
+    return render(request, 'location.html', context)
 
+@login_required
+def bulk_import_locations(request):
+    if request.method == "POST" and request.FILES.get("csv_file"):
+        csv_file = request.FILES["csv_file"]
+        import csv
+        import io
+        decoded_file = io.TextIOWrapper(csv_file.file, encoding='utf-8')
+        reader = csv.DictReader(decoded_file)
+        for row in reader:
+            Location.objects.create(
+                name=row.get('name'),
+                room_no=row.get('room_no'),
+                pavilion=row.get('pavilion'),
+                capacity=row.get('capacity') or None,
+                family_id=row.get('family_id') or None,
+                type_id=row.get('type_id') or None,
+                floor_id=row.get('floor_id') or None,
+                building_id=row.get('building_id') or None
+            )
+        messages.success(request, "CSV imported successfully!")
+        return redirect("locations_list")
+    messages.error(request, "No file selected!")
+    return redirect("locations_list")
+
+
+import csv
+from django.http import HttpResponse
+from .models import Location
+
+@login_required
+def export_locations_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="locations.csv"'
+
+    writer = csv.writer(response)
+    # Write header
+    writer.writerow(['Name', 'Room No', 'Pavilion', 'Capacity', 'Family', 'Type', 'Floor', 'Building'])
+
+    # Write data
+    locations = Location.objects.all()
+    for loc in locations:
+        writer.writerow([
+            loc.name,
+            loc.room_no,
+            loc.pavilion,
+            loc.capacity,
+            loc.family.name if loc.family else '',
+            loc.type.name if loc.type else '',
+            loc.floor.floor_number if loc.floor else '',
+            loc.building.name if loc.building else ''
+        ])
+
+    return response
 
 # -------------------------------
 # Add/Edit Location
@@ -1817,8 +1909,14 @@ from django.contrib import messages
 
 @login_required
 def checklist_list(request):
-    checklists = Checklist.objects.all()
-    return render(request, "list.html", {"checklists": checklists})
+    checklists = Checklist.objects.annotate(
+        required_items_count=Count('checklistitem', filter=Q(checklistitem__required=True))
+    )
+
+    # Active checklists are those with at least one required item
+    active_checklists_count = checklists.filter(required_items_count__gt=0).count()
+
+    return render(request, "list.html", {"checklists": checklists,"active_checklists_count":active_checklists_count})
 
 @login_required
 def add_checklist(request):

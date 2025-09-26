@@ -103,10 +103,17 @@ path('complaints/', views.complaint_list, name='complaint_list'),
     path("checklists/add/", views.add_checklist, name="add_checklist"),
     path("checklists/edit/<int:checklist_id>/", views.edit_checklist, name="edit_checklist"),
     path("checklists/delete/<int:checklist_id>/", views.delete_checklist, name="delete_checklist"),
+
+    
+
     path("checkin/", views.create_voucher_checkin, name="checkin_form"),
     path("scan/gym/", views.scan_gym_page, name="scan_gym_page"),
     path("gym/report/", views.gym_report, name="gym_report"),
     path("data-checker/", views.data_checker, name="data_checker"),
+
+
+    path("bulk_import_locations/",views.bulk_import_locations,name="bulk_import_locations"),
+    path("export_locations_csv/",views.export_locations_csv,name="export_locations_csv"),
      
     path("voucher/<int:voucher_id>/", views.voucher_detail_public, name="voucher_detail_public"),
     path("scan/<str:code>/", views.scan_voucher, name="scan_voucher"),

@@ -119,6 +119,13 @@ class LocationType(models.Model):
 
 
 class Location(models.Model):
+    STATUS_CHOICES = [
+    ('active', 'Active'),
+    ('maintenance', 'Maintenance'),
+]
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+
     location_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=50,blank=False, null=False)       # updated (was 160)
     family = models.ForeignKey(LocationFamily, on_delete=models.CASCADE,blank=False, null=False)
@@ -131,7 +138,7 @@ class Location(models.Model):
     room_no = models.CharField(max_length=40,blank=False, null=False)
     capacity = models.IntegerField(blank=True, null=True)
     building = models.ForeignKey('Building', models.DO_NOTHING,blank=False, null=False)  # kept for compatibility
-
+    
     class Meta:
         db_table = 'location'
 
