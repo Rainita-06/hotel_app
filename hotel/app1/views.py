@@ -1377,6 +1377,133 @@ def locations_list(request):
         'search_query': search_query,
     }
     return render(request, 'location.html', context)
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from .models import LocationFamily, LocationType
+
+
+# def location_manage_view(request, family_id):
+#     """Main page to manage a single LocationFamily."""
+#     family = get_object_or_404(LocationFamily, family_id=family_id)
+
+#     all_location_types = family.types.all()
+#     first_three = all_location_types[:3]
+#     remaining_count = max(all_location_types.count() - 3, 0)
+
+#     locations_with_status = [
+#         {"name": loc.name, "status": "Active" if loc.is_active else "Inactive"}
+#         for loc in first_three
+#     ]
+
+#     context = {
+#         "family": family,
+#         "locations": locations_with_status,
+#         "remaining_count": remaining_count,
+#         # if you store a checklist model, fetch it here.
+#         "default_checklist": {"name": "Room Service"},
+#     }
+#     return render(request, "location_manage.html", context)
+
+
+# @require_http_methods(["POST"])
+# def add_family(request):
+#     """
+#     Create a new LocationFamily from a form or AJAX POST.
+#     Expects a field 'name'.
+#     """
+#     name = request.POST.get("name", "").strip()
+#     if not name:
+#         return JsonResponse({"error": "Name is required"}, status=400)
+
+#     family = LocationFamily.objects.create(name=name)
+#     return JsonResponse({"success": True, "family_id": family.id, "family_name": family.name})
+
+
+# def search_families(request):
+#     """
+#     Returns JSON list of families matching a ?q= search.
+#     """
+#     query = request.GET.get("q", "").strip()
+#     results = LocationFamily.objects.filter(name__icontains=query) if query else []
+#     return JsonResponse({
+#         "results": [{"id": f.id, "name": f.name} for f in results]
+#     })
+
+# app1/views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from .models import LocationFamily, LocationType, Checklist
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+
+# app1/views.py
+from django.shortcuts import render, get_object_or_404
+from .models import LocationFamily, LocationType, Checklist
+
+def location_manage_view(request, family_id=None):
+    """
+    If family_id is provided, show that family's details.
+    Otherwise, show all families.
+    """
+    default_checklist = Checklist.objects.first()
+
+    if family_id:
+        family = get_object_or_404(LocationFamily, family_id=family_id)
+        locations = family.types.all()  # related_name='types'
+        remaining_count = max(0, locations.count() - 5)  # show "+N more" if needed
+        context = {
+            'families': [family],
+            'locations': locations[:5],
+            'remaining_count': remaining_count,
+            'default_checklist': default_checklist
+        }
+    else:
+        families = LocationFamily.objects.prefetch_related('types').all()
+        context = {
+            'families': families,
+            'default_checklist': default_checklist
+        }
+
+    return render(request, 'location_management.html', context)
+
+
+
+def search_locations(request):
+    """
+    Search for location types by name.
+    Returns JSON results.
+    """
+    query = request.GET.get('q', '')
+    results = []
+
+    if query:
+        location_types = LocationType.objects.filter(name__icontains=query)
+        for loc in location_types:
+            results.append({
+                'id': loc.id,
+                'name': loc.name,
+                'family': loc.family.name,
+                'status': 'Active' if loc.is_active else 'Inactive',
+            })
+    return JsonResponse({'results': results})
+
+
+@csrf_exempt
+def add_family(request):
+    """
+    Add a new location family via AJAX.
+    """
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Name cannot be empty.'})
+
+        family, created = LocationFamily.objects.get_or_create(name=name)
+        return JsonResponse({'success': True, 'family_id': family.id})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
 
 @login_required
 def bulk_import_locations(request):
@@ -1629,6 +1756,13 @@ def type_form(request, type_id=None):
     context = {"loc_type": loc_type}
     return render(request, "type_form.html", context)
 
+# views.py
+from django.shortcuts import render
+from .models import Building
+
+def building_cards(request):
+    buildings = Building.objects.all()
+    return render(request, 'building.html', {'buildings': buildings})
 
 
 
@@ -1671,6 +1805,29 @@ def floor_form(request, floor_id=None):
 # -------------------------------
 # Buildings
 # -------------------------------
+# def building_form(request, building_id=None):
+#     if building_id:
+#         building = get_object_or_404(Building, pk=building_id)
+        
+#     else:
+#         building = None
+
+#     if request.method == "POST":
+#         name = request.POST.get("name")
+
+#         if building:
+#             building.name = name
+#             building.save()
+#             messages.success(request, "Building updated successfully!")
+#         else:
+#             Building.objects.create(name=name)
+#             messages.success(request, "Building added successfully!")
+
+#         return redirect("locations_list")
+
+#     context = {"building": building}
+#     return render(request, "building_form.html", context)
+
 def building_form(request, building_id=None):
     if building_id:
         building = get_object_or_404(Building, pk=building_id)
@@ -1679,19 +1836,38 @@ def building_form(request, building_id=None):
 
     if request.method == "POST":
         name = request.POST.get("name")
+        description = request.POST.get("description")
+        status = request.POST.get("status", "active")
+        image = request.FILES.get("image")
 
         if building:
             building.name = name
+            building.description = description
+            building.status = status
+            if image:
+                building.image = image
             building.save()
             messages.success(request, "Building updated successfully!")
         else:
-            Building.objects.create(name=name)
+            Building.objects.create(
+                name=name, description=description, status=status, image=image
+            )
             messages.success(request, "Building added successfully!")
 
         return redirect("locations_list")
 
-    context = {"building": building}
-    return render(request, "building_form.html", context)
+    return render(request, "building_form.html", {"building": building})
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import Building
+
+def upload_building_image(request, building_id):
+    building = get_object_or_404(Building, building_id=building_id)
+    if request.method == "POST" and request.FILES.get("image"):
+        building.image = request.FILES["image"]
+        building.save()
+        messages.success(request, "Image uploaded successfully!")
+    return redirect("building_cards")  # redirect to the building cards page
 
 
 

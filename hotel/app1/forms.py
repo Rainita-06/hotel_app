@@ -26,3 +26,10 @@
 #         model = GymVisitor
 #         fields ='__all__'
 
+from django import forms
+from .models import Building, Floor
+
+class FloorForm(forms.ModelForm):
+    class Meta:
+        model = Floor
+        fields = ["building", "name", "description", "rooms", "occupancy", "is_active"]

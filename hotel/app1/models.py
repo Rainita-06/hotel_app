@@ -84,18 +84,39 @@ class UserGroupMembership(models.Model):
 # =========================
 
 class Building(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('maintenance', 'Maintenance'),
+    ]
     building_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=120,blank=False, null=False)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    image = models.ImageField(upload_to='building_images/', null=True, blank=True)  # NEW
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active') 
 
     class Meta:
         db_table = 'building'
+    
+    @property
+    def floors_count(self):
+        return self.floors.count()   # thanks to related_name='floors'
+
+    @property
+    def rooms_count(self):
+        return self.locations.count()  
+
+    
 
 
 class Floor(models.Model):
     floor_name=models.CharField(max_length=50,blank=False,null=False)
     floor_id = models.BigAutoField(primary_key=True)
-    building = models.ForeignKey('Building', models.DO_NOTHING,blank=False, null=False)
+    building = models.ForeignKey('Building', models.DO_NOTHING,blank=False, null=False,related_name='floors')
     floor_number = models.IntegerField(blank=False, null=False)
+    description = models.CharField(max_length=255, blank=True)  # e.g. “Lobby & Reception”
+    rooms = models.PositiveIntegerField(default=0)
+    occupancy = models.PositiveIntegerField(default=0)     # percent (0-100)
+    is_active = models.BooleanField(default=True)
     
 
     class Meta:
@@ -113,6 +134,8 @@ class LocationFamily(models.Model):
 class LocationType(models.Model):
     type_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=120,blank=False, null=False)
+    family = models.ForeignKey(LocationFamily, on_delete=models.CASCADE, related_name='types',null=False)
+    is_active = models.BooleanField(default=True) 
 
     class Meta:
         db_table = 'location_type'
@@ -132,12 +155,12 @@ class Location(models.Model):
     # updated (was FK)
     type = models.ForeignKey(LocationType, on_delete=models.CASCADE, null=True, blank=True)
       # updated (was FK)
-    floor = models.ForeignKey(Floor, on_delete=models.CASCADE, blank=False, null=False)
+    floor = models.ForeignKey(Floor, on_delete=models.CASCADE, blank=False, null=False,related_name='locations')
             # updated (was FK)
     pavilion = models.CharField(max_length=120, null=True, blank=True)   # added
     room_no = models.CharField(max_length=40,blank=False, null=False)
     capacity = models.IntegerField(blank=True, null=True)
-    building = models.ForeignKey('Building', models.DO_NOTHING,blank=False, null=False)  # kept for compatibility
+    building = models.ForeignKey('Building', models.DO_NOTHING,blank=False, null=False,related_name='locations')  # kept for compatibility
     
     class Meta:
         db_table = 'location'

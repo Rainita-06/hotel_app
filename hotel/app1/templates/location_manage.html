@@ -1,0 +1,117 @@
+{% extends "base_new.html" %}
+{% load static %}
+{% block content %}
+
+<!-- Page header -->
+<div class="w-[1184px] h-24 relative bg-white border-b border-gray-200">
+  <div class="w-[1136px] h-14 left-[24px] top-[16px] absolute flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Location Management</h1>
+      <p class="text-sm text-gray-600">Manage location families and types for service requests</p>
+    </div>
+
+    <!-- Search input -->
+    <div class="flex items-center gap-4">
+      <input id="searchInput"
+             type="text"
+             placeholder="Search locations..."
+             class="border rounded-lg px-3 py-2 text-sm focus:outline-sky-600" />
+      <button id="addFamilyBtn"
+              class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700">
+        Add Family
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="familiesContainer" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for family in families %}
+  <div class="family-card bg-white rounded-xl shadow outline outline-1 outline-gray-200 p-6" data-name="{{ family.name|lower }}">
+    <!-- Family Header -->
+    <div class="flex justify-between items-center mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-sky-600/10 rounded-lg flex justify-center items-center">
+          <div class="w-5 h-3.5 bg-sky-600"></div>
+        </div>
+        <div>
+          <div class="text-gray-900 text-base font-semibold">{{ family.name }}</div>
+          <div class="text-gray-600 text-xs">{{ family.types.count }} location types</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Types -->
+    <div class="space-y-2 mb-4">
+      {% for loc in family.types.all|slice:":5" %}
+      <div class="flex justify-between items-center">
+        <span class="text-gray-600 text-sm">{{ loc.name }}</span>
+        <span class="text-xs px-2 py-1 rounded-full
+                     {% if loc.is_active %}
+                       bg-green-500/10 text-green-500
+                     {% else %}
+                       bg-red-500/10 text-red-500
+                     {% endif %}">
+          {% if loc.is_active %}Active{% else %}Inactive{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+      {% if family.types.count > 5 %}
+      <div class="text-gray-400 text-xs">+{{ family.types.count|add:"-5" }} more types</div>
+      {% endif %}
+    </div>
+
+    <!-- Default Checklist -->
+    {% if default_checklist %}
+    <div class="border-t border-gray-200 pt-2 flex justify-between text-gray-600 text-xs">
+      <span>Default Checklist:</span>
+      <span class="font-medium">{{ default_checklist.name }}</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- JavaScript: search + add -->
+<script>
+document.getElementById('searchInput').addEventListener('input', function() {
+  const query = this.value.toLowerCase();
+  document.querySelectorAll('.family-card').forEach(card => {
+    const name = card.dataset.name;
+    card.style.display = name.includes(query) ? 'block' : 'none';
+  });
+}); 
+document.getElementById('searchInput').addEventListener('input', function () {
+  fetch(`/locations/search/?q=${encodeURIComponent(this.value)}`)
+    .then(r => r.json())
+    .then(data => {
+      console.log('Search results:', data.results);
+      // You can update a dropdown or results container here.
+    });
+});
+
+document.getElementById('addFamilyBtn').addEventListener('click', function () {
+  const name = prompt('Enter new family name:');
+  if (!name) return;
+
+  const csrftoken = '{{ csrf_token }}';
+  fetch('{% url "add_family" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': csrftoken
+    },
+    body: new URLSearchParams({name})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      alert('Family added successfully!');
+      location.href = `/locations/${data.family_id}/`;  // redirect to the new family page
+    } else {
+      alert('Error: ' + (data.error || 'Unknown error'));
+    }
+  });
+});
+</script>
+
+{% endblock %}

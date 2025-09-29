@@ -74,6 +74,12 @@ path('complaints/', views.complaint_list, name='complaint_list'),
     path('user-groups/assign/<int:group_id>/', views.assign_users_group, name='assign_users_group'),
     path('locations/', views.locations_list, name='locations_list'),
     path('locations/add/', views.location_form, name='location_add'),
+    
+     path('location/', views.location_manage_view, name='location_manage'),
+    path('locations/add/', views.add_family, name='add_family'),
+    # path('locations/search/', views.search_families, name='search_families'),
+    path('locations/search/', views.search_locations, name='search_locations'),
+
     path('locations/edit/<int:location_id>/', views.location_form, name='location_edit'),
     path('locations/delete/<int:location_id>/', views.location_delete, name='location_delete'),
     path('request-types/', views.request_types_list, name='request_types_list'),
@@ -96,6 +102,11 @@ path('complaints/', views.complaint_list, name='complaint_list'),
     path("floors/edit/<int:floor_id>/", views.floor_form, name="floor_edit"),
     path("floors/delete/<int:floor_id>/", views.floor_delete, name="floor_delete"),
 
+    # urls.py
+path('buildings/cards/', views.building_cards, name='building_cards'),
+# path('buildings/<int:pk>/', views.building_detail, name='building_detail'),
+path('buildings/<int:pk>/edit/', views.building_edit, name='building_edit'),
+
     # Buildings
     path("buildings/add/", views.building_form, name="building_add"),
     path("buildings/edit/<int:building_id>/", views.building_form, name="building_edit"),
@@ -103,8 +114,10 @@ path('complaints/', views.complaint_list, name='complaint_list'),
     path("checklists/add/", views.add_checklist, name="add_checklist"),
     path("checklists/edit/<int:checklist_id>/", views.edit_checklist, name="edit_checklist"),
     path("checklists/delete/<int:checklist_id>/", views.delete_checklist, name="delete_checklist"),
+    #   path('buildings/<int:building_id>/upload-image/', views.upload_building_image, name='upload_building_image'),
+    # urls.py
+path('buildings/<int:building_id>/upload-image/', views.upload_building_image, name='upload_building_image'),
 
-    
 
     path("checkin/", views.create_voucher_checkin, name="checkin_form"),
     path("scan/gym/", views.scan_gym_page, name="scan_gym_page"),
