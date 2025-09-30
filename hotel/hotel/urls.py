@@ -98,9 +98,13 @@ path('complaints/', views.complaint_list, name='complaint_list'),
     path("types/delete/<int:type_id>/", views.type_delete, name="type_delete"),
 
     # Floors
-    path("floors/add/", views.floor_form, name="floor_add"),
-    path("floors/edit/<int:floor_id>/", views.floor_form, name="floor_edit"),
-    path("floors/delete/<int:floor_id>/", views.floor_delete, name="floor_delete"),
+    path("floors/", views.floors_list, name="floors_list"),
+    # path("floors/add/", views.floor_form, name="floor_add"),
+    # path("floors/edit/<int:floor_id>/", views.floor_form, name="floor_edit"),
+    # path("floors/delete/<int:floor_id>/", views.floor_delete, name="floor_delete"),
+      path("floors/add/", views.floor_form, name="floor_form"),
+    path("floors/<int:floor_id>/edit/", views.floor_form, name="floor_form"),
+    path("floors/<int:floor_id>/delete/", views.floor_delete, name="floor_delete"),
 
     # urls.py
 path('buildings/cards/', views.building_cards, name='building_cards'),

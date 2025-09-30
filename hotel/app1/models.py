@@ -118,6 +118,20 @@ class Floor(models.Model):
     occupancy = models.PositiveIntegerField(default=0)     # percent (0-100)
     is_active = models.BooleanField(default=True)
     
+    @property
+    def total_rooms(self):
+        return self.locations.count()
+
+    @property
+    def occupied_rooms_count(self):
+        return self.locations.filter(is_occupied=True).count()
+
+    @property
+    def occupancy_percent(self):
+        total = self.total_rooms
+        if total == 0:
+            return 0
+        return round((self.occupied_rooms_count / total) * 100, 2)
 
     class Meta:
         db_table = 'floor'
@@ -161,7 +175,7 @@ class Location(models.Model):
     room_no = models.CharField(max_length=40,blank=False, null=False)
     capacity = models.IntegerField(blank=True, null=True)
     building = models.ForeignKey('Building', models.DO_NOTHING,blank=False, null=False,related_name='locations')  # kept for compatibility
-    
+    is_occupied = models.BooleanField(default=False)
     class Meta:
         db_table = 'location'
 

@@ -1353,6 +1353,10 @@ def locations_list(request):
     building_filter = request.GET.get('building')
     search_query = request.GET.get('search')
 
+    paginator = Paginator(locations, 10)  # 10 items per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     if family_filter:
         locations = locations.filter(family_id=family_filter)
     if type_filter:
@@ -1365,7 +1369,7 @@ def locations_list(request):
         locations = locations.filter(name__icontains=search_query) 
 
     context = {
-        'locations': locations,
+        'locations': page_obj,
         'families': families,
         'types': types,
         'floors': floors,
@@ -1375,6 +1379,7 @@ def locations_list(request):
         'selected_floor': floor_filter,
         'selected_building': building_filter,
         'search_query': search_query,
+        "page_obj":page_obj,
     }
     return render(request, 'location.html', context)
 from django.shortcuts import render, get_object_or_404, redirect
@@ -1534,8 +1539,37 @@ import csv
 from django.http import HttpResponse
 from .models import Location
 
+# @login_required
+# def export_locations_csv(request):
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="locations.csv"'
+
+#     writer = csv.writer(response)
+#     # Write header
+#     writer.writerow(['Name', 'Room No', 'Pavilion', 'Capacity', 'Family', 'Type', 'Floor', 'Building'])
+
+#     # Write data
+#     locations = Location.objects.all()
+#     for loc in locations:
+#         writer.writerow([
+#             loc.name,
+#             loc.room_no,
+#             loc.pavilion,
+#             loc.capacity,
+#             loc.family.name if loc.family else '',
+#             loc.type.name if loc.type else '',
+#             loc.floor.floor_number if loc.floor else '',
+#             loc.building.name if loc.building else ''
+#         ])
+
+#     return response
+
 @login_required
 def export_locations_csv(request):
+    import csv
+    from django.http import HttpResponse
+    from .models import Location
+
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="locations.csv"'
 
@@ -1543,7 +1577,7 @@ def export_locations_csv(request):
     # Write header
     writer.writerow(['Name', 'Room No', 'Pavilion', 'Capacity', 'Family', 'Type', 'Floor', 'Building'])
 
-    # Write data
+    # Write data safely
     locations = Location.objects.all()
     for loc in locations:
         writer.writerow([
@@ -1551,13 +1585,14 @@ def export_locations_csv(request):
             loc.room_no,
             loc.pavilion,
             loc.capacity,
-            loc.family.name if loc.family else '',
-            loc.type.name if loc.type else '',
-            loc.floor.floor_number if loc.floor else '',
-            loc.building.name if loc.building else ''
+            getattr(loc, 'family', None) and getattr(loc.family, 'name', '') or '',
+            getattr(loc, 'type', None) and getattr(loc.type, 'name', '') or '',
+            getattr(loc, 'floor', None) and getattr(loc.floor, 'floor_number', '') or '',
+            getattr(loc, 'building', None) and getattr(loc.building, 'name', '') or ''
         ])
 
     return response
+
 
 # -------------------------------
 # Add/Edit Location
@@ -1668,21 +1703,73 @@ def type_delete(request, type_id):
 # -------------------------------
 # Floors
 # -------------------------------
+# def floors_list(request):
+#     floors = Floor.objects.all()
+#     if request.method == "POST":
+#         name = request.POST.get("floor_name")
+#         floor_number = request.POST.get("floor_number") or 0
+#         Floor.objects.create(floor_name=name, floor_number=floor_number)
+#         messages.success(request, "Floor added successfully!")
+#         return redirect("locations_list")
+#     return floors
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Building, Floor
+
 def floors_list(request):
-    floors = Floor.objects.all()
+    floors = Floor.objects.select_related("building").all()
+    buildings = Building.objects.all()
+    return render(request, "floors.html", {"floors": floors, "buildings": buildings})
+
+# def floor_delete(request, floor_id):
+#     f = get_object_or_404(Floor, pk=floor_id)
+#     f.delete()
+#     messages.success(request, "Floor deleted successfully!")
+#     return redirect("locations_list")
+def floor_form(request, floor_id=None):
+    floor = get_object_or_404(Floor, pk=floor_id) if floor_id else None
+
     if request.method == "POST":
         name = request.POST.get("floor_name")
         floor_number = request.POST.get("floor_number") or 0
-        Floor.objects.create(floor_name=name, floor_number=floor_number)
-        messages.success(request, "Floor added successfully!")
-        return redirect("locations_list")
-    return floors
+        building_id = request.POST.get("building_id")
+        rooms = request.POST.get("rooms") or 0
+        occupancy = request.POST.get("occupancy") or 0
+        is_active = request.POST.get("is_active") == "on"
+
+        building = get_object_or_404(Building, pk=building_id)
+
+        if floor:
+            floor.floor_name = name
+            floor.floor_number = floor_number
+            floor.building = building
+            floor.rooms = rooms
+            floor.occupancy = occupancy
+            floor.is_active = is_active
+            floor.save()
+            messages.success(request, "Floor updated successfully!")
+        else:
+            Floor.objects.create(
+                floor_name=name,
+                floor_number=floor_number,
+                building=building,
+                rooms=rooms,
+                occupancy=occupancy,
+                is_active=is_active,
+            )
+            messages.success(request, "Floor added successfully!")
+        return redirect("floors_list")
+
+    buildings = Building.objects.all()
+    return render(request, "floor_form.html", {"floor": floor, "buildings": buildings})
+
 
 def floor_delete(request, floor_id):
-    f = get_object_or_404(Floor, pk=floor_id)
-    f.delete()
+    floor = get_object_or_404(Floor, pk=floor_id)
+    floor.delete()
     messages.success(request, "Floor deleted successfully!")
-    return redirect("locations_list")
+    return redirect("floors_list")
 
 
 # -------------------------------
@@ -1770,33 +1857,33 @@ def building_cards(request):
 # -------------------------------
 # Floors
 # -------------------------------
-def floor_form(request, floor_id=None):
-    if floor_id:
-        floor = get_object_or_404(Floor, pk=floor_id)
-    else:
-        floor = None
+# def floor_form(request, floor_id=None):
+#     if floor_id:
+#         floor = get_object_or_404(Floor, pk=floor_id)
+#     else:
+#         floor = None
     
-    if request.method == "POST":
-        name = request.POST.get("floor_name")
-        floor_number = request.POST.get("floor_number") or 0
-        building_id = request.POST.get('building_id')
-        building = Building.objects.get(building_id=building_id)
-        if floor:
-            floor.floor_name = name
-            floor.floor_number = floor_number
-            floor.building=building
-            floor.save()
-            messages.success(request, "Floor updated successfully!")
-        else:
-            Floor.objects.create(floor_name=name, floor_number=floor_number,building=building)
-            messages.success(request, "Floor added successfully!")
+#     if request.method == "POST":
+#         name = request.POST.get("floor_name")
+#         floor_number = request.POST.get("floor_number") or 0
+#         building_id = request.POST.get('building_id')
+#         building = Building.objects.get(building_id=building_id)
+#         if floor:
+#             floor.floor_name = name
+#             floor.floor_number = floor_number
+#             floor.building=building
+#             floor.save()
+#             messages.success(request, "Floor updated successfully!")
+#         else:
+#             Floor.objects.create(floor_name=name, floor_number=floor_number,building=building)
+#             messages.success(request, "Floor added successfully!")
 
-        return redirect("locations_list")
-    buildings = Building.objects.all()
+#         return redirect("locations_list")
+#     buildings = Building.objects.all()
         
 
-    context = {"floor": floor,  'buildings': buildings}
-    return render(request, "floor_form.html", context)
+#     context = {"floor": floor,  'buildings': buildings}
+#     return render(request, "floor_form.html", context)
 
 
 

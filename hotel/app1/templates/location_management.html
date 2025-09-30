@@ -10,17 +10,17 @@
                     <div class="w-3.5 h-5 left-0 top-[2px] absolute bg-black/0 border-gray-200">
                         <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
                             <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                                <div class="w-3.5 h-3 left-0 top-[2px] absolute bg-gray-400"></div>
+                                <!-- <div class="w-3.5 h-3 left-0 top-[2px] absolute bg-gray-400"></div> -->
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="w-64 h-8 relative bg-black/0 border-gray-200">
-                    <div class="w-64 h-8 left-0 top-[1px] absolute justify-start text-gray-900 text-2xl font-bold font-['Inter']">Location Management</div>
+                    <div class="w-64 h-8 left-0 top-[1px] absolute justify-start text-gray-900 text-2xl font-bold font-['Inter']truncate whitespace-nowrap overflow-hidden">Location Management</div>
                 </div>
             </div>
             <div class="w-96 h-5 left-0 top-[36px] absolute bg-black/0 border-gray-200">
-                <div class="w-96 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter']">Manage location families and types for service requests</div>
+                <div class="w-96 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter'] truncate">Manage location families and types for service requests</div>
             </div>
         </div>
         <div class="w-80 h-10 bg-black/0 border-gray-200 flex justify-start items-center gap-4">
@@ -32,8 +32,17 @@
                 </div>
                 <div class="w-4 h-6 left-[12px] top-[9px] absolute bg-black/0 border-gray-200">
                     <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
-                        <div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-4 h-4 left-0 top-0 absolute bg-gray-400"></div>
+                        <img src="{% static 'icon/search.svg'%}" class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+                            <!-- <div class="w-4 h-4 left-0 top-0 absolute bg-gray-400"></div> -->
+                        <!-- </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="w-7 h-10 relative bg-black/0 rounded-lg border-gray-200">
+                <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
+                    <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
+                        <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+                            <!-- <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
                         </div>
                     </div>
                 </div>
@@ -42,16 +51,7 @@
                 <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
                     <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
                         <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="w-7 h-10 relative bg-black/0 rounded-lg border-gray-200">
-                <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
-                    <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                        <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div>
+                            <!-- <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
                         </div>
                     </div>
                 </div>
@@ -60,16 +60,9 @@
     </div>
 </div>
 <!-- sub tab -->
- <div class="w-[1184px] h-14 relative bg-white border-b border-gray-200">
-    <div class="w-[1136px] h-14 left-[24px] top-0 absolute bg-black/0 border-gray-200 inline-flex justify-start items-start gap-8">
-        <div class="w-32 self-stretch relative bg-black/0 border-b-2 border-sky-600">
-            <div class="w-32 h-5 left-[4px] top-[17px] absolute text-center justify-start text-sky-600 text-sm font-medium font-['Inter']">Location Families</div>
-        </div>
-        <div class="w-28 self-stretch relative bg-black/0 border-b-2 border-black/0">
-            <div class="w-28 h-5 left-[4px] top-[17px] absolute text-center justify-start text-gray-600 text-sm font-medium font-['Inter']">Location Types</div>
-        </div>
-    </div>
-</div>
+{% include "partials/location_tab.html" %}
+
+
 
 <div class="w-[1184px] min-h-screen relative bg-black/0 border-gray-200">
     <div class="w-[1136px] h-[634px] left-[24px] top-[24px] absolute bg-black/0 border-gray-200">
@@ -79,15 +72,15 @@
                     <div class="w-44 h-7 left-0 top-[2px] absolute justify-start text-gray-900 text-xl font-semibold font-['Inter']">Location Families</div>
                 </div>
                 <div class="w-96 h-5 left-0 top-[32px] absolute bg-black/0 border-gray-200">
-                    <div class="w-96 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter']">Group related location types together for better organization</div>
+                    <div class="w-96 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter'] truncate">Group related location types together for better organization</div>
                 </div>
             </div>
             <div class="w-32 h-9 relative bg-sky-600 rounded-lg border-gray-200">
                 <div class="w-3 h-4 left-[19.72px] top-[9px] absolute bg-black/0 border-gray-200">
                     <div class="w-3 h-3.5 left-0 top-[1.75px] absolute inline-flex justify-center items-center">
-                        <div class="w-3 h-3.5 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-3 h-3 left-[0.44px] top-[1.31px] absolute bg-white"></div>
-                        </div>
+                        <img src="{% static 'icon/plus.svg'%}" class="w-3 h-3.5 relative bg-black/0 border-gray-200 overflow-hidden">
+                            <!-- <div class="w-3 h-3 left-[0.44px] top-[1.31px] absolute bg-white"></div> -->
+                        <!-- </div> -->
                     </div>
                 </div>
                 <a href="{% url 'family_add' %}" class="w-20 h-5 left-[39.97px] top-[9px] absolute text-center justify-start text-white text-sm font-medium font-['Inter']">Add Family</a>
@@ -122,9 +115,9 @@
             <div class="w-1 h-6 relative bg-black/0 border-gray-200">
                 <div class="w-1 h-5 left-0 top-[2px] absolute bg-black/0 border-gray-200">
                     <div class="w-1 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                        <div class="w-1 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-1 h-3.5 left-[0.25px] top-[1.25px] absolute bg-gray-400"></div>
-                        </div>
+                        <img src="{% static 'icon/dot.svg'%}" class="w-1 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+                            <!-- <div class="w-1 h-3.5 left-[0.25px] top-[1.25px] absolute bg-gray-400"></div> -->
+                        <!-- </div> -->
                     </div>
                 </div>
             </div>
@@ -156,7 +149,7 @@
             <div class="w-80 h-4 left-0 top-[17px] relative bg-black/0 border-gray-200 inline-flex justify-between items-center">
                 {% if default_checklist %}
                 <div class="w-24 h-4 relative bg-black/0 border-gray-200">
-                    <div class="w-24 h-4 left-0 top-0 absolute justify-start text-gray-600 text-xs font-normal font-['Inter']">Default Checklist:</div>
+                    <div class="w-24 h-4 left-0 top-0 absolute justify-start text-gray-600 text-xs font-normal font-['Inter'] truncate">Default Checklist:</div>
                 </div>
                 <div class="w-20 h-4 relative bg-black/0 border-gray-200">
                     <div class="w-20 h-4 left-0 top-0 absolute justify-start text-gray-600 text-xs font-medium font-['Inter']truncate whitespace-nowrap overflow-hidden">{{ default_checklist.name }}</div>
