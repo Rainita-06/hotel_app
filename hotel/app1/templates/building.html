@@ -1,4 +1,4 @@
-{% extends "base_new.html" %}
+{% extends "basee.html" %}
 {% load static %}
 {% block content %}
 <div class="w-[1184px] h-28 relative bg-white border-b border-gray-200">
@@ -51,12 +51,14 @@
                     </div>
                 </div>
                 <div class="w-24 h-6 relative bg-black/0 border-gray-200">
+                    <a href="{% url 'building_add'%}">
                     <div class="w-24 h-6 left-0 top-[2px] absolute text-center justify-start text-white text-base font-normal font-['Inter']">Add Building</div>
-                </div>
+                </a></div>
             </div>
         </div>
     </div>
 </div>
+{% include 'pop-up.html'%}
 {% include "partials/location_tab.html" %}
 
 
@@ -121,8 +123,9 @@
                         <div class="w-20 h-5 left-0 top-[1px] relativetext-center justify-start text-sky-600 text-sm font-medium font-['Inter']">View Details</div>
                     </div>
                     <div class="w-6 h-5 relative bg-black/0 border-gray-200">
+                        <a href="{% url 'building_edit' b.building_id %}">
                         <div class="w-6 h-5 left-0 top-[1px] relative text-center justify-start text-gray-600 text-sm font-normal font-['Inter']">Edit</div>
-                    </div>
+                    </a></div>
                 </div>
             </div>
         </div>

@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuestConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen">
+
+    <!-- Sidebar -->
+    <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
+        
+        <!-- Logo Section -->
+        <div class="h-24 border-b border-gray-200 flex items-center px-6">
+            <div class="w-10 h-10 bg-sky-600 rounded-lg flex items-center justify-center text-white font-bold">
+                GC
+            </div>
+            <div class="ml-3">
+                <div class="text-gray-900 text-lg font-bold">GuestConnect</div>
+                <div class="text-gray-600 text-xs">by Victoire</div>
+            </div>
+        </div>
+
+        <!-- Menu Section -->
+        <div class="flex-1 overflow-y-auto px-4 py-6">
+            
+            <p class="text-gray-400 text-xs font-semibold mb-2">Overview</p>
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm font-medium">Dashboard</span>
+            </a>
+
+            <p class="text-gray-400 text-xs font-semibold mt-6 mb-2">Management</p>
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm font-medium">Manage Users</span>
+            </a>
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm">Locations</span>
+            </a>
+            
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm">Messaging Setup</span>
+            </a>
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm">Camera Settings</span>
+            </a>
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm">Data & Exports</span>
+            </a>
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 ">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm">Configure Requests</span>
+            </a>
+
+            <p class="text-gray-400 text-xs font-semibold mt-6 mb-2">System</p>
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm">Settings</span>
+            </a>
+            <a href="{% url 'locations_list' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <div class="w-4 h-4 bg-gray-600"></div>
+                <span class="text-sm">Analytics</span>
+            </a>
+        </div>
+
+        <!-- User Section -->
+        <div class="h-20 border-t border-gray-200 flex items-center px-6 gap-3">
+            <img src="https://placehold.co/40x40" class="w-10 h-10 rounded-full">
+            <div>
+                <div class="text-gray-900 text-sm font-medium">Admin User</div>
+                <div class="text-gray-600 text-xs">admin@victoire.com</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 bg-gray-50 min-h-screen p-6 overflow-y-auto">
+        {% block content %}
+            {% include 'floors.html' %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>

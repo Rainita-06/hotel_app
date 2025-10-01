@@ -1345,18 +1345,15 @@ def locations_list(request):
     types = LocationType.objects.all()
     floors = Floor.objects.all()
     buildings = Building.objects.all()
-
+    
     # Filters
     family_filter = request.GET.get('family')
     type_filter = request.GET.get('type')
     floor_filter = request.GET.get('floor')
     building_filter = request.GET.get('building')
-    search_query = request.GET.get('search')
+    search_query = request.GET.get('search', '').strip()  # remove spaces
 
-    paginator = Paginator(locations, 10)  # 10 items per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
+    # Apply filters only if values are present
     if family_filter:
         locations = locations.filter(family_id=family_filter)
     if type_filter:
@@ -1365,8 +1362,13 @@ def locations_list(request):
         locations = locations.filter(floor_id=floor_filter)
     if building_filter:
         locations = locations.filter(building_id=building_filter)
-    if search_query:
-        locations = locations.filter(name__icontains=search_query) 
+    if search_query:  # only filter if input is not empty
+        locations = locations.filter(name__icontains=search_query)
+
+    # Pagination
+    paginator = Paginator(locations, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     context = {
         'locations': page_obj,
@@ -1379,9 +1381,10 @@ def locations_list(request):
         'selected_floor': floor_filter,
         'selected_building': building_filter,
         'search_query': search_query,
-        "page_obj":page_obj,
+        "page_obj": page_obj,
     }
     return render(request, 'location.html', context)
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -1678,26 +1681,39 @@ def family_delete(request, family_id):
     family = get_object_or_404(LocationFamily, pk=family_id)
     family.delete()
     messages.success(request, "Family deleted successfully!")
-    return redirect("locations_list")
+    return redirect("location_manage_view")
 
 
 # -------------------------------
 # Location Types
 # -------------------------------
+# def types_list(request):
+#     types = LocationType.objects.all()
+#     if request.method == "POST":
+#         name = request.POST.get("name")
+#         LocationType.objects.create(name=name)
+#         messages.success(request, "Type added successfully!")
+#         return render(request,"types.html",{"types":types})
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import LocationType
+
 def types_list(request):
     types = LocationType.objects.all()
     if request.method == "POST":
         name = request.POST.get("name")
-        LocationType.objects.create(name=name)
-        messages.success(request, "Type added successfully!")
-        return redirect("locations_list")
-    return types
+        if name:
+            LocationType.objects.create(name=name)
+            messages.success(request, "Type added successfully!")
+            return redirect("types_list")  # redirect after POST to avoid form resubmission
+    return render(request, "types.html", {"types": types})
+
 
 def type_delete(request, type_id):
     t = get_object_or_404(LocationType, pk=type_id)
     t.delete()
     messages.success(request, "Type deleted successfully!")
-    return redirect("locations_list")
+    return redirect("types_list")
 
 
 # -------------------------------
@@ -1718,9 +1734,26 @@ from django.contrib import messages
 from .models import Building, Floor
 
 def floors_list(request):
-    floors = Floor.objects.select_related("building").all()
-    buildings = Building.objects.all()
-    return render(request, "floors.html", {"floors": floors, "buildings": buildings})
+    search_query = request.GET.get("search", "")
+    
+    # Start with all floors
+    floors = Floor.objects.all()
+    
+    if search_query:
+        floors = floors.filter(
+            Q(floor_name__icontains=search_query) |
+            Q(floor_number__icontains=search_query) |
+            Q(building__name__icontains=search_query)
+        )
+    
+    buildings = Building.objects.all()  # if needed in filter dropdowns
+    
+    context = {
+        "floors": floors,
+        "search_query": search_query,
+        "buildings": buildings,
+    }
+    return render(request, "floors.html", context)
 
 # def floor_delete(request, floor_id):
 #     f = get_object_or_404(Floor, pk=floor_id)
@@ -1729,7 +1762,7 @@ def floors_list(request):
 #     return redirect("locations_list")
 def floor_form(request, floor_id=None):
     floor = get_object_or_404(Floor, pk=floor_id) if floor_id else None
-
+    
     if request.method == "POST":
         name = request.POST.get("floor_name")
         floor_number = request.POST.get("floor_number") or 0
@@ -1809,7 +1842,7 @@ def family_form(request, family_id=None):
             LocationFamily.objects.create(name=name)
             messages.success(request, "Family added successfully!")
 
-        return redirect("locations_list")
+        return redirect("location_manage_view")
 
     context = {"family": family}
     return render(request, "family_form.html", context)
@@ -1819,29 +1852,67 @@ def family_form(request, family_id=None):
 
 
 # -------------------------------
-# Location Types
-# -------------------------------
+# # Location Types
+# # -------------------------------
+# def type_form(request, type_id=None):
+#     families = LocationFamily.objects.all() 
+#     if type_id:
+#         loc_type = get_object_or_404(LocationType, pk=type_id)
+#     else:
+#         loc_type = None
+
+#     if request.method == "POST":
+#         name = request.POST.get("name")
+
+#         if loc_type:
+#             loc_type.name = name
+#             loc_type.save()
+#             messages.success(request, "Type updated successfully!")
+#         else:
+#             LocationType.objects.create(name=name)
+#             messages.success(request, "Type added successfully!")
+
+#         return redirect("types_list")
+
+#     context = {"loc_type": loc_type,"families":families}
+#     return render(request, "type_form.html", context)
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import LocationType, LocationFamily
+
 def type_form(request, type_id=None):
-    if type_id:
-        loc_type = get_object_or_404(LocationType, pk=type_id)
-    else:
-        loc_type = None
+    # If editing
+    loc_type = get_object_or_404(LocationType, pk=type_id) if type_id else None
+
+    # All families for dropdown
+    families = LocationFamily.objects.all()
 
     if request.method == "POST":
         name = request.POST.get("name")
+        family_id = request.POST.get("family")
+
+        if not family_id:
+            messages.error(request, "Please select a family!")
+            return render(request, "type_form.html", {"type": loc_type, "families": families})
+
+        family = get_object_or_404(LocationFamily, pk=family_id)
 
         if loc_type:
+            # Update existing
             loc_type.name = name
+            loc_type.family = family
             loc_type.save()
             messages.success(request, "Type updated successfully!")
         else:
-            LocationType.objects.create(name=name)
+            # Create new
+            LocationType.objects.create(name=name, family=family)
             messages.success(request, "Type added successfully!")
 
-        return redirect("locations_list")
+        return redirect("types_list")
 
-    context = {"loc_type": loc_type}
-    return render(request, "type_form.html", context)
+    return render(request, "type_form.html", {"type": loc_type, "families": families})
+
 
 # views.py
 from django.shortcuts import render
@@ -1941,7 +2012,7 @@ def building_form(request, building_id=None):
             )
             messages.success(request, "Building added successfully!")
 
-        return redirect("locations_list")
+        return redirect("building_cards")
 
     return render(request, "building_form.html", {"building": building})
 
@@ -1968,7 +2039,7 @@ def family_add(request):
         if name:
             LocationFamily.objects.create(name=name)
             messages.success(request, "Family added successfully!")
-            return redirect("locations_list")
+            return redirect("location_manage_view")
     return render(request, "family_form.html")
 
 
@@ -1978,7 +2049,7 @@ def family_edit(request, family_id):
         family.name = request.POST.get("name")
         family.save()
         messages.success(request, "Family updated successfully!")
-        return redirect("locations_list")
+        return redirect("location_manage_view")
     return render(request, "family_form.html", {"family": family})
 
 def type_add(request):
@@ -1987,7 +2058,7 @@ def type_add(request):
         if name:
             LocationType.objects.create(name=name)
             messages.success(request, "Type added successfully!")
-            return redirect("locations_list")
+            return redirect("types_list")
     return render(request, "type_form.html")
 
 
@@ -1997,15 +2068,52 @@ def type_edit(request, type_id):
         t.name = request.POST.get("name")
         t.save()
         messages.success(request, "Type updated successfully!")
-        return redirect("locations_list")
+        return redirect("types_list")
     return render(request, "type_form.html", {"type": t})
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import LocationType, LocationFamily
+
+def type_add(request):
+    families = LocationFamily.objects.all()
+    if request.method == "POST":
+        name = request.POST.get("name")
+        family_id = request.POST.get("family")
+
+        if name and family_id:
+            family = get_object_or_404(LocationFamily, pk=family_id)
+            LocationType.objects.create(name=name, family=family)
+            messages.success(request, "Type added successfully!")
+            return redirect("types_list")
+
+    return render(request, "type_form.html", {"families": families})
+
+
+def type_edit(request, type_id):
+    t = get_object_or_404(LocationType, pk=type_id)
+    families = LocationFamily.objects.all()
+
+    if request.method == "POST":
+        t.name = request.POST.get("name")
+        family_id = request.POST.get("family")
+
+        if family_id:
+            t.family = get_object_or_404(LocationFamily, pk=family_id)
+
+        t.save()
+        messages.success(request, "Type updated successfully!")
+        return redirect("types_list")
+
+    return render(request, "type_form.html", {"type": t, "families": families})
+
 def floor_add(request):
     if request.method == "POST":
         name = request.POST.get("floor_name")
         floor_number = request.POST.get("floor_number") or 0
         Floor.objects.create(floor_name=name, floor_number=floor_number)
         messages.success(request, "Floor added successfully!")
-        return redirect("locations_list")
+        return redirect("floors_list")
     return render(request, "floor_form.html")
 
 
@@ -2016,7 +2124,7 @@ def floor_edit(request, floor_id):
         floor.floor_number = request.POST.get("floor_number") or 0
         floor.save()
         messages.success(request, "Floor updated successfully!")
-        return redirect("locations_list")
+        return redirect("floors_list")
     return render(request, "floor_form.html", {"floor": floor})
 def building_add(request):
     if request.method == "POST":
@@ -2024,7 +2132,7 @@ def building_add(request):
         if name:
             Building.objects.create(name=name)
             messages.success(request, "Building added successfully!")
-            return redirect("locations_list")
+            return redirect("building_cards")
     return render(request, "building_form.html")
 
 
@@ -2034,7 +2142,7 @@ def building_edit(request, building_id):
         building.name = request.POST.get("name")
         building.save()
         messages.success(request, "Building updated successfully!")
-        return redirect("locations_list")
+        return redirect("building_cards")
     return render(request, "building_form.html", {"building": building})
 
 

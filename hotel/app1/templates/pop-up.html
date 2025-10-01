@@ -1,4 +1,4 @@
- {% for message in messages %}
+ <!-- {% for message in messages %}
   <div class="toast text-bg-primary border-0 shadow-lg mb-3" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 350px; font-size: 1.1rem;">
     <div class="d-flex">
       <div class="toast-body fw-bold">
@@ -8,4 +8,47 @@
     </div>
   </div>
   {% endfor %}
+</div> -->
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-5 right-5 flex flex-col items-end space-y-3 z-50">
+  {% for message in messages %}
+  <div class="toast relative w-80 bg-blue-500 text-white rounded-lg shadow-lg opacity-0 transform translate-y-2 transition-all duration-300" role="alert" aria-live="assertive" aria-atomic="true" style="font-size: 1.1rem;">
+    <div class="flex items-center justify-between p-4">
+      <div class="font-bold">
+        {{ message }}
+      </div>
+      <button type="button" class="text-white hover:text-gray-200" onclick="dismissToast(this)">
+        ✕
+      </button>
+    </div>
+  </div>
+  {% endfor %}
 </div>
+
+<script>
+  // Animate and auto-dismiss
+  document.addEventListener('DOMContentLoaded', () => {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach((toast, index) => {
+      // Slight delay for staggered appearance
+      setTimeout(() => {
+        toast.classList.remove('opacity-0', 'translate-y-2');
+        toast.classList.add('opacity-100', 'translate-y-0');
+      }, 100 * index);
+
+      // Auto-dismiss after 4 seconds
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000 + (index * 100));
+    });
+  });
+
+  // Manual dismiss
+  function dismissToast(button) {
+    const toast = button.closest('.toast');
+    toast.classList.add('opacity-0', 'translate-y-2');
+    setTimeout(() => toast.remove(), 300);
+  }
+</script>

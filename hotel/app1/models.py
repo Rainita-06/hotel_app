@@ -140,7 +140,9 @@ class Floor(models.Model):
 class LocationFamily(models.Model):
     family_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=120,blank=False, null=False)
-
+    
+    def __str__(self):
+        return self.name
     class Meta:
         db_table = 'location_family'
 
@@ -150,7 +152,9 @@ class LocationType(models.Model):
     name = models.CharField(max_length=120,blank=False, null=False)
     family = models.ForeignKey(LocationFamily, on_delete=models.CASCADE, related_name='types',null=False)
     is_active = models.BooleanField(default=True) 
-
+    
+    def __str__(self):
+        return self.name
     class Meta:
         db_table = 'location_type'
 

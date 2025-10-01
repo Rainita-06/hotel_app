@@ -1,7 +1,7 @@
 {% extends "basee.html" %}
 {% load static %}
 {% block content %}
-<div class="w-[1184px] h-full relative bg-gray-50 border-gray-200">
+<div class="w-full h-full relative bg-gray-50 border-gray-200">
 <div class="w-[1184px] h-24 relative bg-white border-b border-gray-200">
     <div class="w-[1136px] h-14 left-[24px] top-[16px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
         <div class="w-96 h-14 relative bg-black/0 border-gray-200">
@@ -9,14 +9,14 @@
                 <div class="w-3.5 h-6 relative bg-black/0 border-gray-200">
                     <div class="w-3.5 h-5 left-0 top-[2px] absolute bg-black/0 border-gray-200">
                         <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-                            <!-- <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden"> -->
+                            <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
                                 <!-- <div class="w-3.5 h-3 left-0 top-[2px] absolute bg-gray-400"></div> -->
-                            <!-- </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="w-64 h-8 relative bg-black/0 border-gray-200">
-                    <div class="w-64 h-8  top-[1px] absolute justify-start text-gray-900 text-2xl font-bold font-['Inter']truncate whitespace-nowrap overflow-hidden">Location Management</div>
+                    <div class="w-64 h-8 left-0 top-[1px] absolute justify-start text-gray-900 text-2xl font-bold font-['Inter']truncate whitespace-nowrap overflow-hidden">Location Management</div>
                 </div>
             </div>
             <div class="w-96 h-5 left-0 top-[36px] absolute bg-black/0 border-gray-200">
@@ -28,7 +28,7 @@
                 <div class="w-64 h-10 left-0 top-0  bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
                     <input id="searchInput"
              type="text"
-             placeholder="Search locations families..." class="w-64 h-10 left-[60px] top-0  px-9 rounded lg  text-gray-400 text-base font-normal font-['Inter'] leading-normal outline-none" data-name="{{ family.name|lower }}"/>
+             placeholder="Search types..." class="w-64 h-10 left-[60px] top-0  px-9 rounded lg  text-gray-400 text-base font-normal font-['Inter'] leading-normal outline-none" data-name="{{ types.name|lower }}"/>
                 </div>
                 <div class="w-4 h-6 left-[12px] top-[9px] absolute bg-black/0 border-gray-200">
                     <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
@@ -59,7 +59,6 @@
         </div>
     </div>
 </div>
-{% include 'pop-up.html'%}
 <!-- sub tab -->
 {% include "partials/location_tab.html" %}
 
@@ -70,7 +69,7 @@
         <div class="w-[1136px] h-12 left-0 top-0 absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
             <div class="w-96 h-12 relative bg-black/0 border-gray-200">
                 <div class="w-96 h-7 left-0 top-0 absolute bg-black/0 border-gray-200">
-                    <div class="w-44 h-7 left-0 top-[2px] absolute justify-start text-gray-900 text-xl font-semibold font-['Inter']">Location Families</div>
+                    <div class="w-44 h-7 left-0 top-[2px] absolute justify-start text-gray-900 text-xl font-semibold font-['Inter']">Location Types</div>
                 </div>
                 <div class="w-96 h-5 left-0 top-[32px] absolute bg-black/0 border-gray-200">
                     <div class="w-96 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter'] truncate">Group related location types together for better organization</div>
@@ -84,14 +83,14 @@
                         <!-- </div> -->
                     </div>
                 </div>
-                <a href="{% url 'family_add' %}" class="w-20 h-5 left-[39.97px] top-[9px] absolute text-center justify-start text-white text-sm font-medium font-['Inter']">Add Family</a>
+                <a href="{% url 'type_add' %}" class="w-20 h-5 left-[39.97px] top-[9px] absolute text-center justify-start text-white text-sm font-medium font-['Inter']">Add Types</a>
             </div>
         </div>
 
 
         <div class="w-[1136px] mt-24 grid grid-cols-3 gap-6">
- {% for family in families %}
-    <div class="w-96 h-64 bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-offset-[-1px] outline-gray-200 relative family-card" data-name="{{ family.name|lower }}">
+ {% for t in types %}
+    <div class="w-96 h-64 bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-offset-[-1px] outline-gray-200 relative types-card" data-name="{{ t.name|lower }}">
         
         <div class="w-80 h-10 left-[25px] top-[25px] relative bg-black/0 border-gray-200 inline-flex justify-between items-center">
             <div class="w-40 h-10 bg-black/0 border-gray-200 flex justify-start items-center gap-3">
@@ -106,14 +105,15 @@
                 </div>
                 <div class="w-24 h-10 relative bg-black/0 border-gray-200">
                     <div class="w-24 h-6 left-0 top-0 absolute bg-black/0 border-gray-200">
-                        <div class="w-24 h-6 left-0 top-[2px] absolute justify-start text-gray-900 text-base font-semibold font-['Inter'] truncate whitespace-nowrap overflow-hidden">{{ family.name }}</div>
+                        <div class="w-24 h-6 left-0 top-[2px] absolute justify-start text-gray-900 text-base font-semibold font-['Inter'] truncate whitespace-nowrap overflow-hidden">{{ t.name }}</div>
                     </div>
                     <div class="w-24 h-4 left-0 top-[24px] absolute bg-black/0 border-gray-200">
-                        <div class="w-24 h-4 left-0 top-0 absolute justify-start text-gray-600 text-xs font-normal font-['Inter']">+{{ family.types.count }} location types</div>
+                        <div class="w-24 h-4 left-0 top-0 absolute justify-start text-gray-600 text-xs font-normal font-['Inter']">Family name:{{ t.family.name }} </div>
                     </div>
                 </div>
             </div>
-            <div class="relative inline-block" data-type-id="{{ t.type_id }}">
+           <!-- inside your loop -->
+<div class="relative inline-block" data-type-id="{{ t.type_id }}">
   <button
     type="button"
     class="dot-btn w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 focus:outline-none"
@@ -124,12 +124,14 @@
   </button>
 
   <div class="menu hidden absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-    <a href="{% url 'family_edit' family.family_id %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">✏️ Edit</a>
-    <a href="{% url 'family_delete' family.family_id %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">🗑 Delete</a>
+    <a href="{% url 'type_edit' t.type_id %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">✏️ Edit</a>
+    <a href="{% url 'type_delete' t.type_id %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">🗑 Delete</a>
   </div>
-</div></div>
+</div>
 
-        <div class="w-80 h-28 left-[25px] top-[81px] absolute bg-black/0 border-gray-200">
+        </div>
+
+        <!-- <div class="w-80 h-28 left-[25px] top-[81px] absolute bg-black/0 border-gray-200">
             <div class="w-80 h-6 left-0 top-0 relative bg-black/0 border-gray-200 inline-flex justify-between items-center">
                 {% for loc in family.types.all|slice:":5" %}
                 <div class="w-24 h-5 relative bg-black/0 border-gray-200">
@@ -162,7 +164,7 @@
                 </div>
                 {% endif %}
             </div>
-        </div>
+        </div> -->
 
     </div>
     {% endfor %}
@@ -171,7 +173,7 @@
 <script>
 document.getElementById('searchInput').addEventListener('input', function() {
   const query = this.value.toLowerCase();
-  document.querySelectorAll('.family-card').forEach(card => {
+  document.querySelectorAll('.types-card').forEach(card => {
     const name = card.dataset.name;
     card.style.display = name.includes(query) ? 'block' : 'none';
   });
@@ -208,10 +210,25 @@ document.getElementById('addFamilyBtn').addEventListener('click', function () {
     }
   });
 });
-
-
 </script>
+<script>
+function toggleMenu(button) {
+    const menu = button.nextElementSibling;
+    // Hide all other open menus first
+    document.querySelectorAll(".relative .absolute").forEach(el => {
+        if (el !== menu) el.classList.add("hidden");
+    });
+    // Toggle this one
+    menu.classList.toggle("hidden");
+}
 
+// Optional: close menu when clicking outside
+document.addEventListener("click", function(event) {
+    if (!event.target.closest(".relative")) {
+        document.querySelectorAll(".relative .absolute").forEach(el => el.classList.add("hidden"));
+    }
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -253,4 +270,5 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+
 {% endblock %}

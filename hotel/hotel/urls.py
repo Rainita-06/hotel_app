@@ -88,11 +88,13 @@ path('complaints/', views.complaint_list, name='complaint_list'),
        path('floor/delete/<int:floor_id>/', views.floor_delete, name='floor_delete'),
         path('building/delete/<int:building_id>/', views.building_delete, name='building_delete'),
     path("checklists/", views.checklist_list, name="checklist_list"),
+    path("families/", views.location_manage_view, name="location_manage_view"),
      path("families/add/", views.family_form, name="family_add"),
     path("families/edit/<int:family_id>/", views.family_form, name="family_edit"),
     path("families/delete/<int:family_id>/", views.family_delete, name="family_delete"),
 
     # Types
+    path("types/", views.types_list, name="types_list"),
     path("types/add/", views.type_form, name="type_add"),
     path("types/edit/<int:type_id>/", views.type_form, name="type_edit"),
     path("types/delete/<int:type_id>/", views.type_delete, name="type_delete"),

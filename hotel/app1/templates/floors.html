@@ -1,62 +1,58 @@
-{% extends "base_new.html" %}
+{% extends "basee.html" %}
 {% block content %}
 {%load static%}
 
-<div class="w-[1184px] h-28 relative bg-white border-b border-gray-200">
-    <div class="w-[1136px] h-20 left-[24px] top-[16px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
-        <div class="w-80 h-20 relative bg-black/0 border-gray-200">
-            <div class="w-80 h-5 left-0 top-0 absolute bg-black/0 border-gray-200 inline-flex justify-start items-center gap-2">
-                <div class="w-11 h-5 relative bg-black/0 border-gray-200">
-                    <div class="w-11 h-5 left-0 top-[1px] absolute justify-start text-gray-400 text-sm font-normal font-['Inter']">Admin</div>
-                </div>
-                <div class="w-2 h-4 relative bg-black/0 border-gray-200">
-                    <div class="w-2 h-3 left-0 top-[1.50px] absolute inline-flex justify-center items-center">
-                        <div class="w-2 h-3 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-1.5 h-2.5 left-[1.50px] top-[0.75px] absolute bg-gray-400"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="w-28 h-5 relative bg-black/0 border-gray-200">
-                    <div class="w-28 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter']">Buildings & Floors</div>
-                </div>
+<div class="w-[1184px] h-20 relative bg-white border-b border-gray-200">
+    <div class="w-full h-12 left-[24px] top-[16px]  bg-black/0 border-gray-200 inline-flex justify-between items-center">
+        <div class="w-96 h-12 relative bg-black/0 border-gray-200">
+            <div class="w-96 h-8 left-0 top-0 absolute bg-black/0 border-gray-200">
+                <div class="w-28 h-8 left-0 top-[1px] absolute justify-start text-gray-900 text-2xl font-bold font-['Inter']">Floors</div>
             </div>
-            <div class="w-80 h-8 left-0 top-[24px] absolute bg-black/0 border-gray-200">
-                <div class="w-52 h-8 left-0 top-[1px] absolute justify-start text-gray-900 text-2xl font-bold font-['Inter']">Buildings & Floors</div>
-            </div>
-            <div class="w-80 h-5 left-0 top-[56px] absolute bg-black/0 border-gray-200">
-                <div class="w-80 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter']">Manage your property structure and floor layouts</div>
+            <div class="w-96 h-5 left-0 top-[32px] absolute bg-black/0 border-gray-200">
+                <div class="w-96 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter']">Manage property locations, buildings, floors, and areas</div>
             </div>
         </div>
-        <div class="w-96 h-10 bg-black/0 border-gray-200 flex justify-start items-center gap-4">
+        <div class="w-80 h-10 bg-black/0 border-gray-200 flex justify-start items-center gap-4">
             <div class="w-64 h-10 relative bg-black/0 border-gray-200">
-                <div class="w-64 h-10 left-0 top-0 absolute bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-                    <div class="w-64 h-10 left-[40px] top-0 absolute justify-center text-gray-400 text-base font-normal font-['Inter'] leading-normal">Search buildings or floors...</div>
-                </div>
+                <form method="GET" class="w-64 h-10 left-0 top-0 absolute bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
+                   <input type="text"
+         name="search"
+         value="{{ search_query|default:'' }}"
+         placeholder="Search locations..."
+         class="w-full h-full bg-transparent border-none text-gray-700 text-base font-normal font-['Inter'] px-10 focus:outline-none">
+                </form>
                 <div class="w-4 h-6 left-[12px] top-[9px] absolute bg-black/0 border-gray-200">
                     <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
-                        <div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-4 h-4 left-0 top-0 absolute bg-gray-400"></div>
+                        <img src="{% static 'icon/search.svg'%}"class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden"/>
+                            <!-- <div class="w-4 h-4 left-0 top-0 absolute bg-gray-400"></div> -->
+                        <!-- </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="w-7 h-10 relative bg-black/0 rounded-lg border-gray-200">
+                <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
+                    <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
+                        <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+                            <!-- <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="w-36 h-10 px-4 py-2 bg-sky-600 rounded-lg border-gray-200 flex justify-start items-center gap-2">
-                <div class="w-3.5 h-6 relative bg-black/0 border-gray-200">
-                    <div class="w-3.5 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
+            <div class="w-7 h-10 relative bg-black/0 rounded-lg border-gray-200">
+                <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
+                    <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
                         <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-3 h-3 left-[0.50px] top-[1.50px] absolute bg-white"></div>
+                            <!-- <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
                         </div>
                     </div>
-                </div>
-                <div class="w-24 h-6 relative bg-black/0 border-gray-200">
-                    <div class="w-24 h-6 left-0 top-[2px] absolute text-center justify-start text-white text-base font-normal font-['Inter']">Add Building</div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% include 'partials/location_tab.html' %}
-<div class="w-[1136px] h-[506px] relative bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-offset-[-1px] outline-gray-200">
+
+{% include "partials/location_tab.html" %}
+<!-- <div class="w-[1184px] h-[506px] relative bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-offset-[-1px] outline-gray-200">
     <div class="w-[1086px] h-12 left-[25px] top-[25px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
         <div class="w-80 h-12 relative bg-black/0 border-gray-200">
             <div class="w-80 h-7 left-0 top-0 absolute bg-black/0 border-gray-200">
@@ -71,7 +67,7 @@
                 {% for building in buildings %}
                 <option value="{{ building.id }}"class="w-20 h-9 left-[12px] top-0 absolute justify-center text-black text-sm font-normal font-['Inter']">{{ building.name }}</</option>
                 <div class="w-5 h-5 left-[143px] top-[8px] relative overflow-hidden">
-                    <!-- <div class="w-2.5 h-1.5 left-[5.25px] top-[7.33px] absolute bg-black"></div> -->
+                    <div class="w-2.5 h-1.5 left-[5.25px] top-[7.33px] absolute bg-black"></div>
                 </div>{% endfor %}
             </select>
             
@@ -79,7 +75,7 @@
                 {% for floor in floors %}
                 <option value="{{floor.floor_id}}" class="w-11 h-9 left-[12px] top-0 absolute justify-center text-black text-sm font-normal font-['Inter']">{{floor.floor_name}}</option>
                 <div class="w-5 h-5 left-[64px] top-[8px] absolute overflow-hidden">
-                    <!-- <div class="w-2.5 h-1.5 left-[5.25px] top-[7.33px] absolute bg-black"></div> -->
+                    <div class="w-2.5 h-1.5 left-[5.25px] top-[7.33px] absolute bg-black"></div>
                 </div>{% endfor %}
             </select>
             <div class="w-36 h-10 relative bg-sky-600 rounded-lg border-gray-200">
@@ -116,9 +112,9 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
-<div class="w-[1136px] h-96 relative bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-offset-[-1px] outline-gray-200">
+<div class="w-[1184px] h-full relative bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-offset-[-1px] outline-gray-200">
     <div class="w-[1134px] h-24 left-[1px] top-[1px] absolute bg-black/0 border-b border-gray-200">
         <div class="w-[1086px] h-12 left-[24px] top-[24px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
             <div class="w-56 h-12 relative bg-black/0 border-gray-200">
@@ -132,18 +128,22 @@
             <div class="w-32 h-10 px-4 py-2 bg-sky-600 rounded-lg border-gray-200 flex justify-start items-center gap-2">
                 <div class="w-3.5 h-6 relative bg-black/0 border-gray-200">
                     <div class="w-3.5 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
-                        <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-3 h-3 left-[0.50px] top-[1.50px] absolute bg-white"></div>
-                        </div>
+                        <img src="{% static 'icon/plus.svg'%}" class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+                            <!-- <div class="w-3 h-3 left-[0.50px] top-[1.50px] absolute bg-white"></div> -->
+                        <!-- </div> -->
                     </div>
                 </div>
                 <div class="w-20 h-6 relative bg-black/0 border-gray-200">
-                    <div class="w-20 h-6 left-0 top-[2px] absolute text-center justify-start text-white text-base font-normal font-['Inter']">Add Floor</div>
+                   <a href="{% url 'floor_form' %}" class="inline-flex items-center justify-center w-20 h-6 bg-blue-600 rounded text-white text-base font-normal font-['Inter']">
+    Add Floor
+</a>
+
+                    <!-- <div class="w-20 h-6 left-0 top-[2px] absolute text-center justify-start text-white text-base font-normal font-['Inter']">Add Floor</div> -->
                 </div>
             </div>
         </div>
     </div>
-    <div class="w-[1134px] h-64 left-[1px] top-[98px] absolute bg-black/0 border-gray-200 overflow-hidden">
+    <div class="w-[1134px] h-full left-[1px] top-[98px] relative bg-black/0 border-gray-200 overflow-full">
         <div class="w-[1134px] h-64 left-0 top-0 absolute bg-black/0 border-gray-200">
             <div class="w-[1134px] h-12 left-0 top-0 absolute bg-black/0 border-gray-200">
                 <div class="w-[1134px] h-12 left-0 top-0 absolute bg-neutral-50 border-b border-gray-200">
@@ -167,7 +167,7 @@
                     </div>
                 </div>
             </div>
-            <div class="w-[1134px] h-52 left-0 top-[48.50px] relative bg-black/0 border-gray-200">
+            <div class="w-[1134px] h-full left-0 top-[48.50px] relative bg-black/0 border-gray-200">
                 {% for floor in floors %}
                 <div class="w-[1134px] h-16 left-0 top-0 relative bg-black/0 border-gray-200">
                     <div class="w-64 h-16 left-0 top-0 absolute bg-black/0 border-gray-200">
@@ -175,25 +175,25 @@
                             <div class="pr-3 bg-black/0 inline-flex flex-col justify-start items-start overflow-hidden">
                                 <div class="w-8 h-8 bg-sky-600/10 rounded-lg border-gray-200 inline-flex justify-center items-center">
                                     <div class="w-1.5 h-5 relative bg-black/0 border-gray-200">
-                                        <div class="w-1.5 h-5 left-0 top-[1px] absolute justify-start text-sky-600 text-sm font-medium font-['Inter']">{{ forloop.counter }}</div>
+                                        <div class="w-1.5 h-5 left-0 top-[1px]  justify-start text-sky-600 text-sm font-medium font-['Inter']">{{ forloop.counter }}</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="w-28 h-9 relative bg-black/0 border-gray-200">
                                 <div class="w-28 h-5 left-0 top-0 absolute bg-black/0 border-gray-200">
-                                    <div class="w-24 h-5 left-0 top-[1px] absolute justify-start text-gray-900 text-sm font-medium font-['Inter']">{{ floor.floor_name }}</</div>
+                                    <div class="w-24 h-5 left-0 top-[1px] relative justify-start text-gray-900 text-sm font-medium font-['Inter']">{{ floor.floor_name }}</</div>
                                 </div>
                                 <div class="w-28 h-4 left-0 top-[20px] absolute bg-black/0 border-gray-200">
-                                    <div class="w-28 h-4 left-0 top-0 absolute justify-start text-gray-600 text-xs font-normal font-['Inter']">{{ floor.description }}</div>
+                                    <div class="w-28 h-4 left-0 top-0relative justify-start text-gray-600 text-xs font-normal font-['Inter']">{{ floor.description }}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="w-60 h-16 left-[271.08px] top-0 absolute bg-black/0 border-gray-200">
-                        <div class="w-20 h-5 left-[24px] top-[25.50px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter']">{{ floor.building.name }}</div>
+                        <div class="w-20 h-5 left-[24px] top-[25.50px] relative text-gray-600 text-sm font-normal font-['Inter']">{{ floor.building.name }}</div>
                     </div>
                     <div class="w-32 h-16 left-[506.17px] top-0 absolute bg-black/0 border-gray-200">
-                        <div class="w-5 h-5 left-[24px] top-[25.50px] absolute justify-start text-gray-900 text-sm font-normal font-['Inter']">12</div>
+                        <div class="w-5 h-5 left-[24px] top-[25.50px] relative text-gray-900 text-sm font-normal font-['Inter']">12</div>
                     </div>
                     <div class="w-48 h-16 left-[635.77px] top-0 absolute bg-black/0 border-gray-200">
                         <div class="w-36 h-4 left-[24px] top-[26.50px] absolute bg-black/0 border-gray-200 inline-flex justify-start items-center">
@@ -203,7 +203,7 @@
                                 </div>
                             </div>
                             <div class="w-7 h-4 relative bg-black/0 border-gray-200">
-                                <div class="w-7 h-4 left-0 top-0 absolute justify-start text-gray-600 text-xs font-normal font-['Inter']">85%</div>
+                                <div class="w-7 h-4 left-0 top-0  justify-start text-gray-600 text-xs font-normal font-['Inter']">85%</div>
                             </div>
                         </div>
                     </div>
@@ -216,9 +216,9 @@
                         <div class="w-3.5 h-5 left-[24px] top-[24.50px] absolute bg-black/0 border-gray-200">
                             <div class="w-3.5 h-4 left-0 top-[1px] absolute bg-black/0 border-gray-200">
                                 <div class="w-3.5 h-3.5 left-0 top-[1.75px] absolute inline-flex justify-center items-center">
-                                    <div class="w-3.5 h-3.5 relative bg-black/0 border-gray-200 overflow-hidden">
-                                        <div class="w-3.5 h-3.5 left-0 top-[0.14px] absolute bg-gray-400"></div>
-                                    </div>
+                                    <img src="{% static 'icon/edit.svg'%}" class="w-3.5 h-3.5 relative bg-black/0 border-gray-200 overflow-hidden">
+                                        <!-- <div class="w-3.5 h-3.5 left-0 top-[0.14px] absolute bg-gray-400"></div> -->
+                                    <!-- </div> -->
                                 </div>
                             </div>
                         </div>
@@ -226,7 +226,7 @@
                             <div class="w-4 h-4 left-0 top-[1px] absolute bg-black/0 border-gray-200">
                                 <div class="w-4 h-3.5 left-0 top-[1.75px] absolute inline-flex justify-center items-center">
                                     <div class="w-4 h-3.5 relative bg-black/0 border-gray-200 overflow-hidden">
-                                        <div class="w-4 h-3 left-0 top-[0.98px] absolute bg-gray-400"></div>
+                                        <!-- <div class="w-4 h-3 left-0 top-[0.98px] absolute bg-gray-400"></div> -->
                                     </div>
                                 </div>
                             </div>
@@ -234,9 +234,9 @@
                         <div class="w-3 h-5 left-[85.62px] top-[24.50px] absolute bg-black/0 border-gray-200">
                             <div class="w-3 h-4 left-0 top-[1px] absolute bg-black/0 border-gray-200">
                                 <div class="w-3 h-3.5 left-0 top-[1.75px] absolute inline-flex justify-center items-center">
-                                    <div class="w-3 h-3.5 relative bg-black/0 border-gray-200 overflow-hidden">
-                                        <div class="w-3 h-3.5 left-0 top-0 absolute bg-gray-400"></div>
-                                    </div>
+                                    <img src="{% static 'icon/delete.svg'%}"  class="w-3 h-3.5 relative bg-black/0 border-gray-200 overflow-hidden">
+                                        <!-- <div class="w-3 h-3.5 left-0 top-0 absolute bg-gray-400"></div> -->
+                                    <!-- </div> -->
                                 </div>
                             </div>
                         </div>

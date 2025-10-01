@@ -1,9 +1,9 @@
-{% extends "base_new.html" %}
+{% extends "basee.html" %}
 {% block content %}
 {%load static%}
 
 <div class="w-[1184px] h-20 relative bg-white border-b border-gray-200">
-    <div class="w-[1136px] h-12 left-[24px] top-[16px] absolute bg-black/0 border-gray-200 inline-flex justify-between items-center">
+    <div class="w-full h-12 left-[24px] top-[16px]  bg-black/0 border-gray-200 inline-flex justify-between items-center">
         <div class="w-96 h-12 relative bg-black/0 border-gray-200">
             <div class="w-96 h-8 left-0 top-0 absolute bg-black/0 border-gray-200">
                 <div class="w-28 h-8 left-0 top-[1px] absolute justify-start text-gray-900 text-2xl font-bold font-['Inter']">Locations</div>
@@ -14,13 +14,13 @@
         </div>
         <div class="w-80 h-10 bg-black/0 border-gray-200 flex justify-start items-center gap-4">
             <div class="w-64 h-10 relative bg-black/0 border-gray-200">
-                <div class="w-64 h-10 left-0 top-0 absolute bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
+                <form method="GET" class="w-64 h-10 left-0 top-0 absolute bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
                    <input type="text"
          name="search"
          value="{{ search_query|default:'' }}"
          placeholder="Search locations..."
          class="w-full h-full bg-transparent border-none text-gray-700 text-base font-normal font-['Inter'] px-10 focus:outline-none">
-                </div>
+                </form>
                 <div class="w-4 h-6 left-[12px] top-[9px] absolute bg-black/0 border-gray-200">
                     <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
                         <img src="{% static 'icon/search.svg'%}"class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden"/>
@@ -33,7 +33,7 @@
                 <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
                     <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
                         <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div>
+                            <!-- <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
                         </div>
                     </div>
                 </div>
@@ -42,7 +42,7 @@
                 <div class="w-3.5 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
                     <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
                         <div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-                            <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div>
+                            <!-- <div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
                         </div>
                     </div>
                 </div>
@@ -61,9 +61,9 @@
 <div class="pr-2 bg-black/0 inline-flex flex-col justify-start items-start overflow-hidden">
 <div class="w-3.5 h-6 relative bg-black/0 border-gray-200">
 <div class="w-3.5 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
-<div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-<div class="w-3 h-3 left-[0.50px] top-[1.50px] absolute bg-white"></div>
-</div>
+<img src="{% static 'icon/plus.svg'%}" class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+<!-- <div class="w-3 h-3 left-[0.50px] top-[1.50px] absolute bg-white"></div> -->
+<!-- </div> -->
 </div>
 </div>
 </div>
@@ -76,9 +76,9 @@
 <div class="w-44 h-10 px-4 py-2 bg-green-500 rounded-lg border-gray-200 flex justify-start items-center gap-4">
 <div class="w-4 h-6 relative bg-black/0 border-gray-200">
 <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
-<div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-<div class="w-4 h-4 left-0 top-0 absolute bg-white"></div>
-</div>
+<img src="{% static 'icon/import.svg'%}" class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+<!-- <div class="w-4 h-4 left-0 top-0 absolute bg-white"></div> -->
+<!-- </div> -->
 </div>
 </div>
 <form method="POST" action="{% url 'bulk_import_locations' %}" enctype="multipart/form-data" class="inline-block">
@@ -95,9 +95,9 @@
 <div class="w-28 h-10 px-4 py-2 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200 flex justify-start items-center gap-4">
 <div class="w-4 h-6 relative bg-black/0 border-gray-200">
 <div class="w-4 h-4 left-0 top-[4px] absolute inline-flex justify-center items-center">
-<div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-<div class="w-4 h-4 left-0 top-0 absolute bg-gray-600"></div>
-</div>
+<img src="{% static 'icon/export.svg'%}"class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+<!-- <div class="w-4 h-4 left-0 top-0 absolute bg-gray-600"></div> -->
+<!-- </div> -->
 </div>
 </div>
 <a href="{% url 'export_locations_csv' %}" 
@@ -111,12 +111,31 @@
 <div class="w-64 h-10 bg-black/0 border-gray-200 flex justify-start items-center gap-3">
 <div class="w-44 h-9 bg-black/0 border-gray-200 flex justify-start items-center gap-2">
 <div class="w-10 h-5 relative bg-black/0 border-gray-200">
-<div class="w-10 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter']">Show:</div>
+<div class="w-9 h-5 left-0 top-[1px] absolute justify-start text-gray-600 text-sm font-normal font-['Inter']">Show:</div>
 </div>
-<div class="w-32 h-9 relative bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200">
-<div class="w-20 h-9 left-[12px] top-0 absolute justify-center text-black text-sm font-normal font-['Inter']">All Locations</div>
+<!-- <div class="w-32 h-9 relative bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200"> -->
+ <form method="GET">
+      <select name="building" onchange="this.form.submit()"
+              class="w-32 h-9 left-[24px] relative bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-gray-200 text-black text-sm font-normal font-['Inter'] px-2">
+        <option value="">All Locations</option>
+        {% for building in buildings %}
+        <option value="{{ building.id }}" {% if building.id|stringformat:"s" == selected_building %}selected{% endif %}>
+          {{ building.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </form>
 <div class="w-5 h-5 left-[103px] top-[8px] relative overflow-hidden">
-<div class="w-2.5 h-1.5 left-[5.25px] top-[7.33px] relative bg-black"></div>
+<!-- <div class="w-2.5 h-1.5 left-[5.25px] top-[7.33px] relative bg-black"></div> -->
+<!-- </div> -->
+</div>
+</div>
+<div class="w-8 h-10 relative bg-black/0 rounded-lg border-gray-200">
+<div class="w-4 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
+<div class="w-4 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
+<div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+<!-- <div class="w-4 h-3.5 left-0 top-[1px] absolute bg-gray-600"></div> -->
+</div>
 </div>
 </div>
 </div>
@@ -124,16 +143,7 @@
 <div class="w-4 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
 <div class="w-4 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
 <div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-<div class="w-4 h-3.5 left-0 top-[1px] absolute bg-gray-600"></div>
-</div>
-</div>
-</div>
-</div>
-<div class="w-8 h-10 relative bg-black/0 rounded-lg border-gray-200">
-<div class="w-4 h-5 left-[8px] top-[10px] absolute bg-black/0 border-gray-200">
-<div class="w-4 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-<div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-<div class="w-4 h-3.5 left-0 top-[1px] absolute bg-gray-600"></div>
+<!-- <div class="w-4 h-3.5 left-0 top-[1px] absolute bg-gray-600"></div> -->
 </div>
 </div>
 </div>
@@ -257,18 +267,18 @@
 <div class="w-6 h-8 relative bg-black/0 rounded border-gray-200">
 <div class="w-4 h-5 left-[4px] top-[6px] absolute bg-black/0 border-gray-200">
 <div class="w-4 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-<div class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-<div class="w-4 h-4 left-0 top-[0.17px] absolute bg-gray-600"></div>
-</div>
+  <a href="{% url 'location_edit' loc.location_id %}">
+            <img src="{% static 'icon/edit.svg' %}" class="w-4 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+          </a>
 </div>
 </div>
 </div>
 <div class="w-5 h-8 relative bg-black/0 rounded border-gray-200">
 <div class="w-3.5 h-5 left-[4px] top-[6px] absolute bg-black/0 border-gray-200">
 <div class="w-3.5 h-4 left-0 top-[2px] absolute inline-flex justify-center items-center">
-<div class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
-<div class="w-3.5 h-4 left-0 top-0 absolute bg-gray-600"></div>
-</div>
+  <a href="{% url 'location_delete' loc.location_id %}" onclick="return confirm('Are you sure?')">
+            <img src="{% static 'icon/delete.svg' %}" class="w-3.5 h-4 relative bg-black/0 border-gray-200 overflow-hidden">
+          </a>
 </div>
 </div>
 </div>
